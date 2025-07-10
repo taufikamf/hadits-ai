@@ -22,8 +22,8 @@ wheels/
 
 # Virtual Environment
 venv/
-env/
 ENV/
+env/
 .env
 
 # IDE
@@ -33,31 +33,24 @@ ENV/
 *.swo
 .DS_Store
 
-# Logs and databases
+# Project specific
+data/*.csv
+embedding_cache/
+logs/
 *.log
-*.sqlite3
-*.db
 
-# Local development settings
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# ChromaDB
+.chroma/
+chroma_db/
+chroma_logs/
 
-# Coverage reports
-htmlcov/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
-
-# Test cache
-.pytest_cache/
-.tox/
-.nox/
+# Environment variables
+.env
+.env.*
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb
 
 # Distribution / packaging
 .Python

@@ -56,6 +56,22 @@ class HaditsVectorStore:
             )
             logger.info(f"Created new collection: {self.collection_name}")
     
+    def _generate_unique_id(self, doc: Dict[str, Any]) -> str:
+        """
+        Generate a unique ID for a document by combining kitab and original ID.
+        This ensures uniqueness across different datasets.
+        """
+        kitab = doc.get('kitab', '').lower().replace(' ', '_')
+        original_id = str(doc.get('id', '')).strip()
+        
+        if not kitab or not original_id:
+            # Fallback to UUID if either kitab or ID is missing
+            return str(uuid.uuid4())
+        
+        # Create unique ID by combining kitab and original ID
+        unique_id = f"{kitab}_{original_id}"
+        return unique_id
+    
     def add_documents(self, documents: List[Dict[str, Any]]) -> List[str]:
         """
         Add documents to vector store with batching.
@@ -111,23 +127,23 @@ class HaditsVectorStore:
                     if i >= len(embeddings_list):
                         break
                         
-                    # Generate unique ID
-                    doc_id = doc.get('id', str(uuid.uuid4()))
-                    ids.append(str(doc_id))
+                    # Generate unique ID by combining kitab and original ID
+                    doc_id = self._generate_unique_id(doc)
+                    ids.append(doc_id)
                     
                     # Get embedding
                     embeddings.append(embeddings_list[i])
                     
                     # Prepare metadata
                     metadata = {
-                        'id': str(doc_id),
+                        'original_id': str(doc.get('id', '')),
                         'kitab': doc.get('kitab', ''),
                         'source': doc.get('metadata', {}).get('source', 'hadits_dataset')
                     }
                     metadatas.append(metadata)
                     
                     # Full document content for ChromaDB document field
-                    full_content = f"ID: {doc_id}\nKitab: {doc.get('kitab', '')}\n"
+                    full_content = f"ID: {doc.get('id', '')}\nKitab: {doc.get('kitab', '')}\n"
                     full_content += f"Arab: {doc.get('arab_asli', '')}\n"
                     full_content += f"Terjemahan: {doc.get('terjemah_bersih', '')}"
                     documents_content.append(full_content)
@@ -216,7 +232,7 @@ class HaditsVectorStore:
                         parsed_doc['terjemah'] = line[12:].strip()
                 
                 search_result = {
-                    'id': results['ids'][0][i],
+                    'id': metadata.get('original_id', ''),  # Use original ID for consistency
                     'score': similarity_score,
                     'metadata': metadata,
                     'content': parsed_doc,
