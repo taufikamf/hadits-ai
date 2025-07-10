@@ -9,13 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
 from api.routes import router
+from utils.logger import setup_logging
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO if settings.debug else logging.WARNING,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
+setup_logging()
 logger = logging.getLogger(__name__)
 
 # Create FastAPI app
@@ -90,6 +87,12 @@ async def startup_event():
         raise
 
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    logger.info("Shutting down Hadits-AI service...")
+
+
 if __name__ == "__main__":
     # Run with uvicorn
     uvicorn.run(
@@ -97,5 +100,5 @@ if __name__ == "__main__":
         host=settings.host,
         port=settings.port,
         reload=settings.debug,
-        log_level="info" if settings.debug else "warning"
+        log_level=settings.log_level.lower()
     ) 

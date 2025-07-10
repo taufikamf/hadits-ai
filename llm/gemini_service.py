@@ -3,6 +3,7 @@ LLM service for Google Gemini API integration.
 Inspired by Dify's LLM node implementation.
 """
 import logging
+import time
 from typing import List, Dict, Any, Optional
 import google.generativeai as genai
 
@@ -21,8 +22,19 @@ class GeminiLLMService:
         # Configure Gemini API
         genai.configure(api_key=settings.gemini_api_key)
         
+        # Initialize model with safety settings
+        generation_config = {
+            'temperature': 0.7,
+            'top_p': 0.9,
+            'top_k': 40,
+            'max_output_tokens': 2048,
+        }
+        
         # Initialize model
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            generation_config=generation_config
+        )
         
         logger.info("Initialized Gemini LLM service")
     
@@ -30,7 +42,9 @@ class GeminiLLMService:
         self, 
         query: str, 
         retrieved_docs: List[Dict[str, Any]], 
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        max_retries: int = 3,
+        retry_delay: float = 1.0
     ) -> str:
         """
         Generate response based on query and retrieved documents.
@@ -39,25 +53,49 @@ class GeminiLLMService:
             query: User's question in Indonesian
             retrieved_docs: List of retrieved hadits documents
             system_prompt: Optional system prompt
+            max_retries: Maximum number of retries on failure
+            retry_delay: Delay between retries in seconds
             
         Returns:
             Generated response from Gemini
         """
-        try:
-            # Build context from retrieved documents
-            context = self._build_context(retrieved_docs)
+        if not query.strip():
+            return "Mohon maaf, pertanyaan tidak boleh kosong."
             
-            # Create prompt
-            prompt = self._create_prompt(query, context, system_prompt)
-            
-            # Generate response
-            response = self.model.generate_content(prompt)
-            
-            return response.text
-            
-        except Exception as e:
-            logger.error(f"Failed to generate response: {e}")
-            raise
+        if not retrieved_docs:
+            return "Mohon maaf, tidak ditemukan hadits yang relevan dengan pertanyaan Anda."
+        
+        retries = 0
+        last_error = None
+        
+        while retries < max_retries:
+            try:
+                # Build context from retrieved documents
+                context = self._build_context(retrieved_docs)
+                
+                # Create prompt
+                prompt = self._create_prompt(query, context, system_prompt)
+                
+                # Generate response
+                response = self.model.generate_content(prompt)
+                
+                # Check if response was blocked
+                if not response.text:
+                    logger.warning("Response was empty or blocked")
+                    return "Mohon maaf, pertanyaan tidak dapat diproses karena alasan keamanan."
+                
+                return response.text
+                
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Attempt {retries + 1} failed: {e}")
+                retries += 1
+                if retries < max_retries:
+                    time.sleep(retry_delay)
+                continue
+        
+        logger.error(f"Failed to generate response after {max_retries} attempts: {last_error}")
+        return "Mohon maaf, terjadi kesalahan saat memproses pertanyaan. Silakan coba lagi nanti."
     
     def _build_context(self, retrieved_docs: List[Dict[str, Any]]) -> str:
         """Build context string from retrieved documents"""
@@ -71,14 +109,16 @@ class GeminiLLMService:
             terjemah = doc.get('terjemah', '')
             score = doc.get('score', 0)
             
-            context_part = f"Hadits {i} (Relevansi: {score:.3f}):\n"
+            # Format each hadits with clear structure
+            context_part = f"[HADITS {i}]\n"
             context_part += f"Kitab: {kitab}\n"
+            context_part += f"Relevansi: {score:.3f}\n"
             context_part += f"Arab: {arab}\n"
             context_part += f"Terjemahan: {terjemah}\n"
             
             context_parts.append(context_part)
         
-        return "\n".join(context_parts)
+        return "\n\n".join(context_parts)
     
     def _create_prompt(
         self, 
@@ -92,14 +132,14 @@ class GeminiLLMService:
         
         prompt = f"""{system_prompt}
 
-KONTEKS HADITS:
+[KONTEKS HADITS]
 {context}
 
-PERTANYAAN USER:
+[PERTANYAAN]
 {query}
 
-INSTRUKSI:
-Berikan jawaban yang komprehensif berdasarkan hadits-hadits di atas. Sertakan rujukan yang jelas ke hadits yang relevan."""
+[INSTRUKSI]
+Berikan jawaban yang komprehensif berdasarkan hadits-hadits di atas. Sertakan rujukan yang jelas ke hadits yang relevan. Jika pertanyaan tidak dapat dijawab sepenuhnya dengan hadits yang tersedia, jelaskan keterbatasan tersebut dengan sopan."""
         
         return prompt
     
@@ -107,19 +147,22 @@ Berikan jawaban yang komprehensif berdasarkan hadits-hadits di atas. Sertakan ru
         """Get default system prompt for hadits Q&A"""
         return """Anda adalah asisten AI yang ahli dalam hadits dan ilmu agama Islam. Tugas Anda adalah menjawab pertanyaan berdasarkan hadits-hadits yang disediakan sebagai konteks.
 
-PANDUAN MENJAWAB:
+[PANDUAN MENJAWAB]
 1. Gunakan HANYA hadits yang disediakan dalam konteks untuk menjawab
 2. Berikan jawaban dalam bahasa Indonesia yang jelas dan mudah dipahami
 3. Sertakan rujukan kitab hadits untuk setiap hadits yang Anda kutip
 4. Jika pertanyaan tidak dapat dijawab berdasarkan hadits yang ada, jelaskan dengan sopan
 5. Berikan penjelasan yang mendalam tentang makna dan implikasi hadits
 6. Hindari interpretasi yang tidak didukung oleh teks hadits
+7. Jika ada perbedaan pendapat ulama, sebutkan dengan jelas
+8. Jika pertanyaan sensitif atau kontroversial, berikan jawaban dengan bijak
 
-FORMAT JAWABAN:
-- Mulai dengan jawaban singkat
-- Berikan penjelasan detail berdasarkan hadits
-- Sertakan kutipan hadits yang relevan dengan rujukan kitab
-- Akhiri dengan kesimpulan atau hikmah dari hadits tersebut"""
+[FORMAT JAWABAN]
+1. Jawaban Singkat: Berikan jawaban langsung dan ringkas
+2. Penjelasan Detail: Uraikan makna dan konteks hadits
+3. Rujukan Hadits: Kutip bagian relevan dengan sumber kitab
+4. Kesimpulan: Berikan hikmah atau pelajaran utama
+5. Catatan: Jika ada keterbatasan atau hal yang perlu diperhatikan"""
 
 
 # Global LLM service instance

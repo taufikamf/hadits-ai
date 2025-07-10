@@ -3,8 +3,10 @@ Vector store service for hadits-ai using ChromaDB.
 Inspired by Dify's Vector factory pattern.
 """
 import logging
-import uuid
 from typing import List, Dict, Any, Optional
+import uuid
+import numpy as np
+from tqdm import tqdm
 import chromadb
 from chromadb.config import Settings as ChromaSettings
 
@@ -12,6 +14,9 @@ from config import settings
 from embedding.embedding_service import get_embedding_service
 
 logger = logging.getLogger(__name__)
+
+# ChromaDB batch size limit (slightly below actual limit for safety)
+MAX_BATCH_SIZE = 5000
 
 
 class HaditsVectorStore:
@@ -32,24 +37,28 @@ class HaditsVectorStore:
         
         self.client = chromadb.Client(chroma_settings)
         
-        # Get or create collection
+        # Initialize collection
+        self._initialize_collection()
+    
+    def _initialize_collection(self):
+        """Initialize or get the collection"""
         try:
             self.collection = self.client.get_collection(
-                name=collection_name,
+                name=self.collection_name,
                 embedding_function=None  # We'll handle embeddings manually
             )
-            logger.info(f"Loaded existing collection: {collection_name}")
+            logger.info(f"Loaded existing collection: {self.collection_name}")
         except Exception:
             # Collection doesn't exist, create it
             self.collection = self.client.create_collection(
-                name=collection_name,
+                name=self.collection_name,
                 embedding_function=None
             )
-            logger.info(f"Created new collection: {collection_name}")
+            logger.info(f"Created new collection: {self.collection_name}")
     
     def add_documents(self, documents: List[Dict[str, Any]]) -> List[str]:
         """
-        Add documents to vector store.
+        Add documents to vector store with batching.
         
         Args:
             documents: List of processed hadits documents
@@ -60,72 +69,89 @@ class HaditsVectorStore:
         if not documents:
             return []
         
-        # Prepare data for ChromaDB
-        ids = []
-        embeddings = []
-        metadatas = []
-        documents_content = []
+        all_ids = []
+        total_docs = len(documents)
         
-        # Extract content for embedding
-        contents_to_embed = []
-        for doc in documents:
-            content = doc.get('content_for_embedding', '')
-            if not content:
-                logger.warning(f"Document {doc.get('id', 'unknown')} has no content for embedding")
-                continue
-            contents_to_embed.append(content)
-        
-        if not contents_to_embed:
-            logger.warning("No valid documents to embed")
-            return []
-        
-        # Generate embeddings
-        logger.info(f"Generating embeddings for {len(contents_to_embed)} documents")
         try:
-            embeddings_list = self.embedding_service.embed_documents(contents_to_embed)
-        except Exception as e:
-            logger.error(f"Failed to generate embeddings: {e}")
-            raise
-        
-        # Prepare data for storage
-        for i, doc in enumerate(documents):
-            if i >= len(embeddings_list):
-                break
+            # Process documents in batches
+            for start_idx in range(0, total_docs, MAX_BATCH_SIZE):
+                end_idx = min(start_idx + MAX_BATCH_SIZE, total_docs)
+                batch = documents[start_idx:end_idx]
                 
-            # Generate unique ID
-            doc_id = doc.get('id', str(uuid.uuid4()))
-            ids.append(str(doc_id))
+                logger.info(f"Processing batch {start_idx//MAX_BATCH_SIZE + 1}, documents {start_idx} to {end_idx}")
+                
+                # Prepare data for ChromaDB
+                ids = []
+                embeddings = []
+                metadatas = []
+                documents_content = []
+                
+                # Extract content for embedding
+                contents_to_embed = []
+                for doc in batch:
+                    content = doc.get('content_for_embedding', '')
+                    if not content:
+                        logger.warning(f"Document {doc.get('id', 'unknown')} has no content for embedding")
+                        continue
+                    contents_to_embed.append(content)
+                
+                if not contents_to_embed:
+                    logger.warning("No valid documents to embed in current batch")
+                    continue
+                
+                # Generate embeddings for batch
+                try:
+                    embeddings_list = self.embedding_service.embed_documents(contents_to_embed)
+                except Exception as e:
+                    logger.error(f"Failed to generate embeddings for batch: {e}")
+                    raise
+                
+                # Prepare data for storage
+                for i, doc in enumerate(batch):
+                    if i >= len(embeddings_list):
+                        break
+                        
+                    # Generate unique ID
+                    doc_id = doc.get('id', str(uuid.uuid4()))
+                    ids.append(str(doc_id))
+                    
+                    # Get embedding
+                    embeddings.append(embeddings_list[i])
+                    
+                    # Prepare metadata
+                    metadata = {
+                        'id': str(doc_id),
+                        'kitab': doc.get('kitab', ''),
+                        'source': doc.get('metadata', {}).get('source', 'hadits_dataset')
+                    }
+                    metadatas.append(metadata)
+                    
+                    # Full document content for ChromaDB document field
+                    full_content = f"ID: {doc_id}\nKitab: {doc.get('kitab', '')}\n"
+                    full_content += f"Arab: {doc.get('arab_asli', '')}\n"
+                    full_content += f"Terjemahan: {doc.get('terjemah_bersih', '')}"
+                    documents_content.append(full_content)
+                
+                # Add batch to ChromaDB
+                try:
+                    self.collection.add(
+                        ids=ids,
+                        embeddings=embeddings,
+                        metadatas=metadatas,
+                        documents=documents_content
+                    )
+                    all_ids.extend(ids)
+                    logger.info(f"Successfully added batch of {len(ids)} documents to vector store")
+                    
+                except Exception as e:
+                    logger.error(f"Failed to add batch to ChromaDB: {e}")
+                    raise
             
-            # Get embedding
-            embeddings.append(embeddings_list[i])
+            logger.info(f"Successfully added all {len(all_ids)} documents to vector store")
+            return all_ids
             
-            # Prepare metadata (exclude large content from metadata)
-            metadata = {
-                'id': str(doc_id),
-                'kitab': doc.get('kitab', ''),
-                'source': doc.get('metadata', {}).get('source', 'hadits_dataset')
-            }
-            metadatas.append(metadata)
-            
-            # Full document content for ChromaDB document field
-            # This includes both Arabic and Indonesian for display
-            full_content = f"ID: {doc_id}\nKitab: {doc.get('kitab', '')}\n"
-            full_content += f"Arab: {doc.get('arab_asli', '')}\n"
-            full_content += f"Terjemahan: {doc.get('terjemah_bersih', '')}"
-            documents_content.append(full_content)
-        
-        # Add to ChromaDB
-        try:
-            self.collection.add(
-                ids=ids,
-                embeddings=embeddings,
-                metadatas=metadatas,
-                documents=documents_content
-            )
-            logger.info(f"Successfully added {len(ids)} documents to vector store")
-            return ids
         except Exception as e:
-            logger.error(f"Failed to add documents to ChromaDB: {e}")
+            logger.error(f"Failed to add documents to vector store: {e}")
             raise
     
     def search(self, query: str, top_k: int = 5, score_threshold: float = 0.0) -> List[Dict[str, Any]]:
@@ -216,6 +242,8 @@ class HaditsVectorStore:
         try:
             self.client.delete_collection(self.collection_name)
             logger.info(f"Deleted collection: {self.collection_name}")
+            # Reinitialize collection after deletion
+            self._initialize_collection()
         except Exception as e:
             logger.error(f"Failed to delete collection: {e}")
             raise
@@ -231,7 +259,18 @@ class HaditsVectorStore:
             }
         except Exception as e:
             logger.error(f"Failed to get collection info: {e}")
-            return {'name': self.collection_name, 'count': 0, 'error': str(e)}
+            # Try to reinitialize collection
+            try:
+                self._initialize_collection()
+                count = self.collection.count()
+                return {
+                    'name': self.collection_name,
+                    'count': count,
+                    'embedding_dimension': self.embedding_service.get_dimension()
+                }
+            except Exception as e2:
+                logger.error(f"Failed to reinitialize collection: {e2}")
+                return {'name': self.collection_name, 'count': 0, 'error': str(e2)}
 
 
 # Global vector store instance
@@ -244,6 +283,12 @@ def get_vector_store() -> HaditsVectorStore:
     if _vector_store is None:
         _vector_store = HaditsVectorStore()
     return _vector_store
+
+
+def reset_vector_store():
+    """Reset the global vector store instance"""
+    global _vector_store
+    _vector_store = None
 
 
 # Example usage
