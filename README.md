@@ -1,292 +1,251 @@
-# Hadits-AI 🕌
+# Hadits-AI: Retrieval-Augmented Generation System
 
-**Retrieval-Augmented Generation (RAG) system untuk Q&A hadits berbasis AI**
-
-Hadits-AI adalah backend independen yang meniru arsitektur dan kualitas dari Dify untuk sistem knowledge retrieval dan LLM-based chatbot, khusus dirancang untuk menjawab pertanyaan tentang hadits Islam.
+Sistem chatbot pencari hadis berbasis Retrieval-Augmented Generation (RAG) yang menggunakan LLM Gemini dan vector database ChromaDB.
 
 ## 🎯 Fitur Utama
 
-- **📚 Knowledge Base Management**: Ingestion dan preprocessing dataset hadits dalam format CSV
-- **🔍 Semantic Search**: Pencarian hadits berdasarkan makna menggunakan embedding multilingual
-- **🤖 RAG Pipeline**: Integrasi retrieval dengan Google Gemini untuk jawaban yang akurat
-- **⚡ FastAPI Backend**: REST API yang cepat dan scalable
-- **🗄️ Vector Database**: ChromaDB untuk penyimpanan dan pencarian embedding
-- **🌐 Multilingual Support**: Mendukung teks Arab dan Indonesia
+- **Preprocessing Dataset**: Normalisasi teks Arab dan pembersihan teks Indonesia
+- **Semantic Search**: Pencarian hadis berdasarkan makna menggunakan embedding
+- **RAG Pipeline**: Kombinasi retrieval + LLM untuk jawaban yang akurat
+- **API REST**: Endpoint `/ask` untuk query hadis
+- **Vector Database**: ChromaDB dengan embedding built-in
 
-## 🏗️ Arsitektur
-
-Sistem ini mengikuti pola arsitektur Dify dengan komponen-komponen berikut:
+## 🏗️ Arsitektur Sistem
 
 ```
-Query → DatasetRetrieval → VectorSearch → Context → LLM → Response
+CSV Dataset → Preprocessing → Embedding → Vector Index → RAG Pipeline → API Response
 ```
 
-### Struktur Project
+### Komponen Utama:
+1. **Data Loader**: Load dan preprocess dataset CSV
+2. **Text Processor**: Normalisasi teks Arab dan Indonesia  
+3. **Embedding Service**: ChromaDB dengan embedding built-in
+4. **Vector Store**: Index dan search semantic
+5. **LLM Service**: Gemini untuk generate response
+6. **API Routes**: FastAPI endpoints
 
-```
-hadits-ai/
-├── data/                    # Dataset hadits
-│   └── hadits.csv          # Contoh dataset
-├── utils/                   # Text processing utilities  
-│   └── text_processor.py   # Normalisasi Arab & cleaning Indonesia
-├── embedding/               # Embedding services
-│   └── embedding_service.py # Cache-enabled embedding dengan local/API models
-├── retriever/               # Vector storage & retrieval
-│   └── vector_store.py     # ChromaDB integration
-├── llm/                     # LLM integration
-│   └── gemini_service.py   # Google Gemini API service
-├── data/                    # Data loading
-│   └── data_loader.py      # CSV ingestion & processing
-├── api/                     # FastAPI routes
-│   └── routes.py           # REST API endpoints
-├── config.py               # Configuration management
-├── main.py                 # FastAPI application entry point
-└── requirements.txt        # Python dependencies
-```
+## 📋 Requirements
+
+- Python 3.10/3.11
+- Google Gemini API Key
+- Dataset CSV dengan format: `id`, `kitab`, `arab`, `terjemah`
 
 ## 🚀 Quick Start
 
-### 1. Prerequisites
-
-- Python 3.8+
-- Google Gemini API key
-
-### 2. Installation
+### 1. Setup Environment
 
 ```bash
-# Clone atau copy project
+# Clone repository
+git clone <repository-url>
 cd hadits-ai
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# atau
+venv\Scripts\activate     # Windows
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Copy environment file
-cp .env.example .env
 ```
 
-### 3. Configuration
-
-Edit file `.env`:
-
-```env
-# Google Gemini API (Required)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Embedding Model (Optional - default menggunakan local model)
-EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-
-# Optional: Gunakan OpenAI embedding
-# EMBEDDING_MODEL=openai
-# OPENAI_API_KEY=your_openai_api_key_here
-
-# Vector Database
-VECTOR_DB=chroma
-CHROMA_PERSIST_DIRECTORY=./chroma_data
-
-# Dataset
-DATASET_PATH=./data/hadits.csv
-MAX_RETRIEVAL_RESULTS=5
-SCORE_THRESHOLD=0.3
-```
-
-### 4. Persiapan Dataset
-
-Pastikan file `data/hadits.csv` mengikuti format:
-
-```csv
-id,kitab,arab,terjemah
-1,shahih_bukhari,"حَدَّثَنَا الْحُمَيْدِيُّ...","Telah menceritakan kepada kami..."
-```
-
-### 5. Run Application
+### 2. Konfigurasi
 
 ```bash
-python main.py
+# Copy environment template
+cp .env.example .env
+
+# Edit .env dengan API key Gemini
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 3. Preprocessing Dataset
+
+```bash
+# Preprocess dataset CSV ke JSON
+python preprocess_data.py
+```
+
+### 4. Build Index
+
+```bash
+# Build embedding index
+python build_index_simple.py
+```
+
+### 5. Run Server
+
+```bash
+# Start API server
+python simple_main.py
 ```
 
 Server akan berjalan di `http://localhost:8000`
 
 ## 📡 API Endpoints
 
-### 1. Ask Question (RAG Pipeline)
-
-**Endpoint utama untuk Q&A hadits**
-
-```bash
-GET /api/v1/ask?q=Apa pentingnya niat dalam Islam?
-```
-
-**Response:**
-```json
-{
-  "query": "Apa pentingnya niat dalam Islam?",
-  "answer": "Berdasarkan hadits yang ditemukan, niat memiliki peran yang sangat penting...",
-  "retrieved_hadits": [
-    {
-      "id": "1",
-      "kitab": "shahih_bukhari", 
-      "arab": "إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ...",
-      "terjemah": "Sesungguhnya setiap perbuatan tergantung niatnya...",
-      "score": 0.95
-    }
-  ],
-  "total_results": 1,
-  "processing_time_ms": 245.5
-}
-```
-
-### 2. Rebuild Index
-
-**Re-index dataset hadits**
-
-```bash
-POST /api/v1/index
-```
-
-### 3. Dataset Info
-
-**Informasi tentang dataset**
-
-```bash
-GET /api/v1/info
-```
-
-### 4. Health Check
-
+### Health Check
 ```bash
 GET /api/v1/health
 ```
 
-## 🔧 Pipeline Details
-
-### 1. Data Ingestion & Preprocessing
-
-```python
-# Text Processing (utils/text_processor.py)
-- Normalisasi teks Arab: hapus harakat
-- Cleaning terjemah Indonesia: hapus HTML, quotes, newlines  
-- Output: arab_asli, arab_bersih, terjemah_bersih
+### Ask Question
+```bash
+GET /api/v1/ask?q=apa itu niat
 ```
 
-### 2. Embedding & Indexing
-
-```python
-# Embedding Service (embedding/embedding_service.py)
-- Local: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-- API: OpenAI text-embedding-3-small
-- Caching: Local pickle cache untuk performa
-- Vector Store: ChromaDB dengan persistence
+Response:
+```json
+{
+  "query": "apa itu niat",
+  "answer": "Jawaban dari Gemini berdasarkan hadis yang ditemukan...",
+  "retrieved_documents": [
+    {
+      "id": "1",
+      "kitab": "shahih_bukhari", 
+      "arab_asli": "حَدَّثَنَا الْحُمَيْدِيُّ...",
+      "arab_bersih": "حدثنا الحميدي...",
+      "terjemah": "Telah menceritakan kepada kami...",
+      "score": 0.85
+    }
+  ],
+  "total_results": 5,
+  "processing_time_ms": 1250.5
+}
 ```
 
-### 3. Semantic Retrieval
+## 🔧 Konfigurasi
 
-```python
-# Vector Store (retriever/vector_store.py)
-- Query embedding → Similarity search
-- Top-k results dengan score threshold
-- Metadata filtering berdasarkan kitab
+### Environment Variables (.env)
+
+```bash
+# Required
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Optional
+EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+VECTOR_DB=chroma
+CHROMA_PERSIST_DIRECTORY=./chroma_data
+DATASET_PATH=./data/hadits.csv
+MAX_RETRIEVAL_RESULTS=5
+SCORE_THRESHOLD=0.3
+HOST=0.0.0.0
+PORT=8000
+DEBUG=true
 ```
 
-### 4. LLM Integration
+## 📊 Dataset Format
 
-```python
-# Gemini Service (llm/gemini_service.py)
-- Context building dari retrieved hadits
-- System prompt untuk hadits Q&A
-- Response generation dengan rujukan
-```
+Dataset harus dalam format CSV dengan kolom:
+
+| Kolom | Deskripsi | Contoh |
+|-------|-----------|---------|
+| `id` | ID unik hadis | `1` |
+| `kitab` | Nama kitab | `shahih_bukhari` |
+| `arab` | Teks Arab asli | `حَدَّثَنَا الْحُمَيْدِيُّ...` |
+| `terjemah` | Terjemahan Indonesia | `Telah menceritakan kepada kami...` |
 
 ## 🧪 Testing
 
-### Test Individual Components
-
+### Test Preprocessing
 ```bash
-# Test text processor
-python utils/text_processor.py
-
-# Test embedding service  
-python embedding/embedding_service.py
-
-# Test vector store
-python retriever/vector_store.py
-
-# Test LLM service
-python llm/gemini_service.py
-
-# Test data loader
-python data/data_loader.py
+python preprocess_data.py
 ```
 
-### Test Full Pipeline
-
+### Test Index Building
 ```bash
-curl "http://localhost:8000/api/v1/ask?q=Bagaimana cara bersuci dalam Islam?"
+python build_index_simple.py
 ```
 
-## 📊 Performance Features
-
-- **Embedding Caching**: Local cache untuk embedding yang sudah di-compute
-- **Vector Persistence**: ChromaDB menyimpan index secara persisten
-- **Batch Processing**: Embedding multiple documents sekaligus
-- **Lazy Loading**: Services di-initialize on-demand
-
-## 🔍 Customization
-
-### Menambah Model Embedding
-
-```python
-# embedding/embedding_service.py
-class CustomEmbeddingModel(BaseEmbeddingModel):
-    def embed_documents(self, texts):
-        # Your implementation
-        pass
-```
-
-### Custom LLM Provider
-
-```python  
-# llm/custom_llm_service.py
-class CustomLLMService:
-    def generate_response(self, query, retrieved_docs):
-        # Your implementation
-        pass
-```
-
-### Extended Preprocessing
-
-```python
-# utils/text_processor.py  
-class EnhancedTextProcessor(HaditsDocumentProcessor):
-    def process_hadits_row(self, row):
-        # Your enhanced processing
-        pass
-```
-
-## 🛠️ Troubleshooting
-
-### Common Issues
-
-1. **Model Loading Error**: Pastikan koneksi internet untuk download model pertama kali
-2. **Gemini API Error**: Verifikasi API key dan quota
-3. **ChromaDB Permission**: Pastikan directory writable untuk persistence
-4. **Memory Issues**: Reduce batch size untuk dataset besar
-
-### Debugging
-
+### Test API
 ```bash
-# Enable debug mode
-DEBUG=true python main.py
+# Health check
+curl http://localhost:8000/api/v1/health
 
-# Check logs
-tail -f logs/hadits-ai.log
+# Ask question
+curl "http://localhost:8000/api/v1/ask?q=apa%20itu%20niat"
 ```
+
+## � Struktur Project
+
+```
+hadits-ai/
+├── api/
+│   ├── routes.py              # Original API routes
+│   └── simple_routes.py       # Simple API routes
+├── data/
+│   ├── data_loader.py         # Data loading & preprocessing
+│   ├── hadits.csv            # Sample dataset
+│   └── processed_hadits.json # Preprocessed data
+├── embedding/
+│   ├── embedding_service.py   # Original embedding service
+│   └── simple_embedding.py    # Simple embedding with ChromaDB
+├── llm/
+│   └── gemini_service.py      # Gemini LLM integration
+├── retriever/
+│   ├── vector_store.py        # Original vector store
+│   └── simple_vector_store.py # Simple vector store
+├── utils/
+│   └── text_processor.py      # Text preprocessing utilities
+├── config.py                  # Configuration settings
+├── main.py                    # Original FastAPI app
+├── simple_main.py             # Simple FastAPI app
+├── preprocess_data.py         # Data preprocessing script
+├── build_index_simple.py      # Index building script
+├── requirements.txt           # Python dependencies
+├── .env.example              # Environment template
+└── README.md                 # This file
+```
+
+## � Troubleshooting
+
+### Error: "GEMINI_API_KEY required"
+- Pastikan file `.env` sudah dibuat dengan API key yang valid
+- Cek format: `GEMINI_API_KEY=your_key_here`
+
+### Error: "No documents found"
+- Pastikan file CSV dataset ada di `./data/hadits.csv`
+- Jalankan `python preprocess_data.py` terlebih dahulu
+
+### Error: "Import sentence_transformers failed"
+- Project menggunakan ChromaDB built-in embedding sebagai fallback
+- Gunakan `simple_main.py` dan `build_index_simple.py`
+
+### Error: "Vector store not initialized"
+- Jalankan `python build_index_simple.py` untuk build index
+- Atau server akan auto-index saat startup
+
+## 🚀 Deployment
+
+### Local Development
+```bash
+python simple_main.py
+```
+
+### Production
+```bash
+# Set environment variables
+export GEMINI_API_KEY=your_key
+export DEBUG=false
+
+# Run with gunicorn
+pip install gunicorn
+gunicorn simple_main:app -w 4 -k uvicorn.workers.UvicornWorker
+```
+
+## 📈 Monitoring
+
+- Health check: `GET /api/v1/health`
+- Processing time tersedia di response API
+- Logs tersedia di console dengan level INFO/DEBUG
 
 ## 🤝 Contributing
 
 1. Fork repository
 2. Create feature branch
-3. Add tests for new features  
-4. Submit pull request
+3. Commit changes
+4. Push to branch
+5. Create Pull Request
 
 ## 📄 License
 
@@ -294,11 +253,7 @@ MIT License - lihat file LICENSE untuk detail.
 
 ## 🙏 Acknowledgments
 
-- **Dify**: Inspirasi arsitektur dan patterns
-- **ChromaDB**: Vector database solution
-- **SentenceTransformers**: Multilingual embedding models
-- **Google Gemini**: LLM capabilities
-
----
-
-**Hadits-AI** - Bringing Islamic knowledge closer through AI 🌟 
+- Google Gemini API untuk LLM
+- ChromaDB untuk vector database
+- FastAPI untuk web framework
+- Sentence Transformers untuk embedding models 
