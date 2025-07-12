@@ -1,6 +1,5 @@
 """
 Vector store service for hadits-ai using ChromaDB.
-Inspired by Dify's Vector factory pattern.
 """
 import logging
 from typing import List, Dict, Any, Optional
@@ -9,6 +8,7 @@ import numpy as np
 from tqdm import tqdm
 import chromadb
 from chromadb.config import Settings as ChromaSettings
+import re
 
 from config import settings
 from embedding.embedding_service import get_embedding_service
@@ -22,7 +22,6 @@ MAX_BATCH_SIZE = 5000
 class HaditsVectorStore:
     """
     Vector store for hadits documents using ChromaDB.
-    Inspired by Dify's ChromaVector implementation.
     """
     
     def __init__(self, collection_name: str = "hadits_collection"):
@@ -72,6 +71,63 @@ class HaditsVectorStore:
         unique_id = f"{kitab}_{original_id}"
         return unique_id
     
+    def _normalize_text(self, text: str) -> str:
+        """
+        Normalize text for better matching:
+        - Convert to lowercase
+        - Remove excessive whitespace
+        - Remove punctuation
+        - Handle common Indonesian text variations
+        """
+        if not isinstance(text, str):
+            return ""
+        
+        # Convert to lowercase
+        text = text.lower()
+        
+        # Remove excessive whitespace
+        text = " ".join(text.split())
+        
+        # Remove punctuation except in common abbreviations
+        text = re.sub(r'[^\w\s.]', ' ', text)
+        
+        # Handle common Indonesian variations
+        replacements = {
+            'sholat': 'salat',
+            'shalat': 'salat',
+            'solat': 'salat',
+            'wudhu': 'wudu',
+            'wudlu': 'wudu',
+            'hadist': 'hadis',
+            'hadits': 'hadis',
+        }
+        
+        for old, new in replacements.items():
+            text = re.sub(r'\b' + old + r'\b', new, text)
+        
+        return text.strip()
+    
+    def _prepare_text_for_embedding(self, doc: Dict[str, Any]) -> str:
+        """
+        Prepare document text for embedding with improved context.
+        """
+        # Get text fields
+        arab_text = doc.get('arab_asli', '').strip()
+        terjemah_text = doc.get('terjemah_bersih', '').strip()
+        kitab = doc.get('kitab', '').strip()
+        
+        # Normalize Indonesian translation
+        normalized_terjemah = self._normalize_text(terjemah_text)
+        
+        # Create context-rich text for embedding
+        # Format: Kitab information, followed by translation, then Arabic
+        # This order prioritizes matching in Indonesian while maintaining Arabic context
+        embedding_text = f"Kitab: {kitab}\n"
+        embedding_text += f"Terjemahan: {normalized_terjemah}\n"
+        embedding_text += f"Arab: {arab_text}"
+        
+        return embedding_text
+    
     def add_documents(self, documents: List[Dict[str, Any]]) -> List[str]:
         """
         Add documents to vector store with batching.
@@ -105,7 +161,8 @@ class HaditsVectorStore:
                 # Extract content for embedding
                 contents_to_embed = []
                 for doc in batch:
-                    content = doc.get('content_for_embedding', '')
+                    # Prepare optimized text for embedding
+                    content = self._prepare_text_for_embedding(doc)
                     if not content:
                         logger.warning(f"Document {doc.get('id', 'unknown')} has no content for embedding")
                         continue
@@ -134,11 +191,12 @@ class HaditsVectorStore:
                     # Get embedding
                     embeddings.append(embeddings_list[i])
                     
-                    # Prepare metadata
+                    # Prepare metadata with normalized text
                     metadata = {
                         'original_id': str(doc.get('id', '')),
                         'kitab': doc.get('kitab', ''),
-                        'source': doc.get('metadata', {}).get('source', 'hadits_dataset')
+                        'source': doc.get('metadata', {}).get('source', 'hadits_dataset'),
+                        'normalized_terjemah': self._normalize_text(doc.get('terjemah_bersih', ''))
                     }
                     metadatas.append(metadata)
                     
@@ -185,18 +243,19 @@ class HaditsVectorStore:
         if not query.strip():
             return []
         
-        # Generate query embedding
         try:
-            query_embedding = self.embedding_service.embed_query(query)
-        except Exception as e:
-            logger.error(f"Failed to embed query: {e}")
-            raise
-        
-        # Search in ChromaDB
-        try:
+            # Normalize query text
+            normalized_query = self._normalize_text(query)
+            logger.info(f"Normalized query: {normalized_query}")
+            
+            # Generate query embedding
+            query_embedding = self.embedding_service.embed_query(normalized_query)
+            
+            # Search in ChromaDB with higher initial k to allow for post-filtering
+            initial_k = min(top_k * 2, 20)  # Get more results initially
             results = self.collection.query(
                 query_embeddings=[query_embedding],
-                n_results=top_k,
+                n_results=initial_k,
                 include=['documents', 'metadatas', 'distances']
             )
             
@@ -243,8 +302,9 @@ class HaditsVectorStore:
                 
                 search_results.append(search_result)
             
-            # Sort by score (highest first)
+            # Sort by score (highest first) and limit to top_k
             search_results.sort(key=lambda x: x['score'], reverse=True)
+            search_results = search_results[:top_k]
             
             logger.info(f"Found {len(search_results)} results for query: {query[:50]}...")
             return search_results
