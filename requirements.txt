@@ -1,0 +1,25 @@
+# Framework API
+fastapi==0.110.1
+uvicorn==0.29.0
+sse-starlette==2.1.3
+
+# Data manipulation
+pandas==2.2.2
+
+# Web scraping
+beautifulsoup4==4.12.3
+requests==2.31.0
+
+# Embedding
+sentence-transformers==2.6.1
+torch==2.2.2
+transformers==4.41.1
+
+# Vector DB (ChromaDB, fallback dari FAISS)
+chromadb==0.4.24
+
+# LLM Integration
+google-generativeai==0.8.3
+
+# Env handling
+python-dotenv==1.0.1

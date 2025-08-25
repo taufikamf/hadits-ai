@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Hadis AI - Chat Interface</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				theme: {
+					extend: {
+						colors: {
+							"chat-gray": "#f7f7f8",
+							"chat-dark": "#343541",
+							"chat-darker": "#202123",
+							"chat-border": "#565869",
+							"assistant-bg": "#444654",
+						},
+					},
+				},
+			};
+		</script>
+		<style>
+			/* Custom scrollbar */
+			.custom-scrollbar::-webkit-scrollbar {
+				width: 4px;
+			}
+			.custom-scrollbar::-webkit-scrollbar-track {
+				background: transparent;
+			}
+			.custom-scrollbar::-webkit-scrollbar-thumb {
+				background: #888;
+				border-radius: 2px;
+			}
+			.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+				background: #555;
+			}
+
+			/* Animation for typing indicator */
+			.typing-indicator {
+				animation: pulse 1.5s ease-in-out infinite;
+			}
+
+			@keyframes pulse {
+				0%,
+				100% {
+					opacity: 0.7;
+				}
+				50% {
+					opacity: 1;
+				}
+			}
+
+			/* Message fade in animation */
+			@keyframes fadeInUp {
+				from {
+					opacity: 0;
+					transform: translateY(10px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.message-animation {
+				animation: fadeInUp 0.3s ease-out;
+			}
+		</style>
+	</head>
+	<body class="bg-gray-100 h-screen flex">
+		<!-- Sidebar -->
+		<div class="w-64 bg-chat-darker text-white flex flex-col h-full">
+			<!-- Header -->
+			<div class="p-4 border-b border-chat-border">
+				<div class="flex items-center justify-between">
+					<h1 class="text-lg font-semibold">🕌 Hadis AI</h1>
+					<button
+						id="newChatBtn"
+						class="bg-chat-dark hover:bg-gray-600 p-2 rounded text-sm transition-colors"
+					>
+						+ New Chat
+					</button>
+				</div>
+			</div>
+
+			<!-- Chat Sessions -->
+			<div class="flex-1 overflow-y-auto custom-scrollbar">
+				<div class="p-4">
+					<h3 class="text-sm font-medium text-gray-400 mb-3">Recent Chats</h3>
+					<div id="sessionsList" class="space-y-2">
+						<!-- Sessions will be loaded here -->
+					</div>
+				</div>
+			</div>
+
+			<!-- Connection Status -->
+			<div class="p-4 border-t border-chat-border">
+				<div id="connectionStatus" class="text-sm">
+					<span id="statusText" class="text-gray-400">Connecting...</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Main Chat Area -->
+		<div class="flex-1 flex flex-col bg-white">
+			<!-- Chat Header -->
+			<div class="border-b border-gray-200 p-4 bg-white">
+				<div class="flex items-center justify-between">
+					<div>
+						<h2 id="chatTitle" class="text-lg font-semibold text-gray-800">
+							Select a chat or start a new one
+						</h2>
+						<p id="chatSubtitle" class="text-sm text-gray-500">
+							Ask questions about Islamic hadiths
+						</p>
+					</div>
+					<div class="flex space-x-2">
+						<button
+							id="editTitleBtn"
+							class="hidden text-gray-500 hover:text-gray-700 p-2 rounded"
+						>
+							✏️
+						</button>
+						<button
+							id="deleteChatBtn"
+							class="hidden text-red-500 hover:text-red-700 p-2 rounded"
+						>
+							🗑️
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Messages Container -->
+			<div
+				id="messagesContainer"
+				class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4"
+			>
+				<!-- Welcome message -->
+				<div id="welcomeMessage" class="text-center py-20">
+					<div class="text-6xl mb-4">🕌</div>
+					<h3 class="text-2xl font-semibold text-gray-800 mb-2">
+						Welcome to Hadis AI
+					</h3>
+					<p class="text-gray-600 max-w-md mx-auto">
+						Ask questions about Islamic hadiths and get comprehensive answers
+						with authentic sources. Start a new conversation or select an
+						existing chat from the sidebar.
+					</p>
+				</div>
+			</div>
+
+			<!-- Typing Indicator -->
+			<div id="typingIndicator" class="hidden px-4 py-2">
+				<div class="flex items-center space-x-2 text-gray-500 text-sm">
+					<div class="typing-indicator">💭</div>
+					<span id="typingText">AI is thinking...</span>
+				</div>
+			</div>
+
+			<!-- Input Area -->
+			<div class="border-t border-gray-200 p-4 bg-white">
+				<div class="flex space-x-4 items-end">
+					<div class="flex-1">
+						<textarea
+							id="messageInput"
+							placeholder="Ask about Islamic hadiths..."
+							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+							rows="1"
+							style="max-height: 120px"
+						></textarea>
+					</div>
+					<button
+						id="sendBtn"
+						class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+						disabled
+					>
+						Send
+					</button>
+				</div>
+
+				<!-- Quick Examples -->
+				<div id="quickExamples" class="mt-3 flex flex-wrap gap-2">
+					<button
+						class="example-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm transition-colors"
+						data-question="apa hukum riba?"
+					>
+						Hukum Riba
+					</button>
+					<button
+						class="example-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm transition-colors"
+						data-question="bagaimana cara shalat malam?"
+					>
+						Shalat Malam
+					</button>
+					<button
+						class="example-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm transition-colors"
+						data-question="apa itu zakat fitrah?"
+					>
+						Zakat Fitrah
+					</button>
+					<button
+						class="example-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm transition-colors"
+						data-question="berikan hadis tentang mati syahid"
+					>
+						Mati Syahid
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Edit Title Modal -->
+		<div
+			id="editTitleModal"
+			class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+		>
+			<div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+				<h3 class="text-lg font-semibold mb-4">Edit Chat Title</h3>
+				<input
+					type="text"
+					id="titleInput"
+					class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+					placeholder="Enter new title"
+				/>
+				<div class="flex justify-end space-x-3 mt-4">
+					<button
+						id="cancelEditBtn"
+						class="px-4 py-2 text-gray-600 hover:text-gray-800"
+					>
+						Cancel
+					</button>
+					<button
+						id="saveTitleBtn"
+						class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+					>
+						Save
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			// Global state
+			let currentSessionId = null;
+			let isStreaming = false;
+			let isConnected = false;
+			const serverUrl = "http://localhost:8000";
+
+			// DOM elements
+			const messagesContainer = document.getElementById("messagesContainer");
+			const messageInput = document.getElementById("messageInput");
+			const sendBtn = document.getElementById("sendBtn");
+			const typingIndicator = document.getElementById("typingIndicator");
+			const sessionsList = document.getElementById("sessionsList");
+			const newChatBtn = document.getElementById("newChatBtn");
+			const welcomeMessage = document.getElementById("welcomeMessage");
+			const chatTitle = document.getElementById("chatTitle");
+			const chatSubtitle = document.getElementById("chatSubtitle");
+			const editTitleBtn = document.getElementById("editTitleBtn");
+			const deleteChatBtn = document.getElementById("deleteChatBtn");
+			const connectionStatus = document.getElementById("connectionStatus");
+			const statusText = document.getElementById("statusText");
+
+			// Auto-resize textarea
+			messageInput.addEventListener("input", function () {
+				this.style.height = "auto";
+				this.style.height = Math.min(this.scrollHeight, 120) + "px";
+
+				// Enable/disable send button
+				sendBtn.disabled = !this.value.trim() || isStreaming;
+			});
+
+			// Send message on Enter (but allow Shift+Enter for new line)
+			messageInput.addEventListener("keydown", function (e) {
+				if (e.key === "Enter" && !e.shiftKey) {
+					e.preventDefault();
+					if (!sendBtn.disabled) {
+						sendMessage();
+					}
+				}
+			});
+
+			// Example buttons
+			document.querySelectorAll(".example-btn").forEach((btn) => {
+				btn.addEventListener("click", () => {
+					messageInput.value = btn.dataset.question;
+					messageInput.dispatchEvent(new Event("input"));
+				});
+			});
+
+			// Check server health
+			async function checkServerHealth() {
+				try {
+					const response = await fetch(`${serverUrl}/health`);
+					const data = await response.json();
+					isConnected = true;
+					statusText.textContent = `Connected - ${data.status}`;
+					statusText.className = "text-green-400";
+					return true;
+				} catch (error) {
+					isConnected = false;
+					statusText.textContent = "Disconnected";
+					statusText.className = "text-red-400";
+					return false;
+				}
+			}
+
+			// Load sessions
+			async function loadSessions() {
+				try {
+					const response = await fetch(`${serverUrl}/sessions`);
+					const data = await response.json();
+
+					sessionsList.innerHTML = "";
+
+					if (data.sessions.length === 0) {
+						sessionsList.innerHTML =
+							'<p class="text-gray-500 text-sm">No chats yet</p>';
+						return;
+					}
+
+					data.sessions.forEach((session) => {
+						const sessionEl = createSessionElement(session);
+						sessionsList.appendChild(sessionEl);
+					});
+				} catch (error) {
+					console.error("Error loading sessions:", error);
+					sessionsList.innerHTML =
+						'<p class="text-red-400 text-sm">Error loading chats</p>';
+				}
+			}
+
+			// Create session element
+			function createSessionElement(session) {
+				const div = document.createElement("div");
+				div.className = `p-3 rounded-lg cursor-pointer transition-colors hover:bg-chat-dark ${
+					currentSessionId === session.session_id
+						? "bg-chat-dark"
+						: "bg-transparent"
+				}`;
+				div.dataset.sessionId = session.session_id;
+
+				div.innerHTML = `
+                <div class="font-medium text-sm truncate">${session.title}</div>
+                <div class="text-xs text-gray-400 mt-1">${session.message_count} messages</div>
+            `;
+
+				div.addEventListener("click", () => loadSession(session.session_id));
+
+				return div;
+			}
+
+			// Create new chat
+			async function createNewChat() {
+				try {
+					const response = await fetch(`${serverUrl}/sessions`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({}),
+					});
+
+					const data = await response.json();
+					currentSessionId = data.session_id;
+
+					// Update UI
+					chatTitle.textContent = data.title;
+					chatSubtitle.textContent = "New conversation started";
+					editTitleBtn.classList.remove("hidden");
+					deleteChatBtn.classList.remove("hidden");
+					welcomeMessage.classList.add("hidden");
+
+					// Clear messages
+					messagesContainer.innerHTML = "";
+
+					// Reload sessions
+					await loadSessions();
+
+					// Focus input
+					messageInput.focus();
+				} catch (error) {
+					console.error("Error creating new chat:", error);
+					alert("Failed to create new chat");
+				}
+			}
+
+			// Load session
+			async function loadSession(sessionId) {
+				try {
+					const response = await fetch(`${serverUrl}/sessions/${sessionId}`);
+					const session = await response.json();
+
+					currentSessionId = sessionId;
+					chatTitle.textContent = session.title;
+					chatSubtitle.textContent = `${session.messages.length} messages`;
+					editTitleBtn.classList.remove("hidden");
+					deleteChatBtn.classList.remove("hidden");
+					welcomeMessage.classList.add("hidden");
+
+					// Clear and load messages
+					messagesContainer.innerHTML = "";
+
+					session.messages.forEach((message) => {
+						addMessage(message.role, message.content, false);
+					});
+
+					// Update sessions list
+					document.querySelectorAll("[data-session-id]").forEach((el) => {
+						el.classList.remove("bg-chat-dark");
+						if (el.dataset.sessionId === sessionId) {
+							el.classList.add("bg-chat-dark");
+						}
+					});
+
+					scrollToBottom();
+				} catch (error) {
+					console.error("Error loading session:", error);
+					alert("Failed to load chat");
+				}
+			}
+
+			// Add message to chat
+			function addMessage(role, content, animate = true) {
+				const messageDiv = document.createElement("div");
+				messageDiv.className = `flex ${
+					role === "user" ? "justify-end" : "justify-start"
+				} ${animate ? "message-animation" : ""}`;
+
+				const bubbleClass =
+					role === "user"
+						? "bg-blue-600 text-white"
+						: "bg-gray-100 text-gray-800";
+
+				const maxWidth = role === "user" ? "max-w-xs" : "max-w-2xl";
+
+				messageDiv.innerHTML = `
+                <div class="${bubbleClass} ${maxWidth} rounded-lg p-4 shadow-sm">
+                    <div class="text-sm font-medium mb-1 ${
+											role === "user" ? "text-blue-100" : "text-gray-600"
+										}">
+                        ${role === "user" ? "You" : "🤖 Hadis AI"}
+                    </div>
+                    <div class="prose prose-sm ${
+											role === "user" ? "prose-invert" : ""
+										}" style="white-space: pre-wrap;">${content}</div>
+                </div>
+            `;
+
+				messagesContainer.appendChild(messageDiv);
+				scrollToBottom();
+			}
+
+			// Send message
+			async function sendMessage() {
+				const message = messageInput.value.trim();
+				if (!message || isStreaming || !isConnected) return;
+
+				// Create session if none exists
+				if (!currentSessionId) {
+					await createNewChat();
+				}
+
+				// Add user message
+				addMessage("user", message);
+
+				// Clear input
+				messageInput.value = "";
+				messageInput.style.height = "auto";
+				sendBtn.disabled = true;
+				isStreaming = true;
+
+				// Show typing indicator
+				showTyping("Processing your question...");
+
+				let fullResponse = "";
+
+				try {
+					const response = await fetch(
+						`${serverUrl}/sessions/${currentSessionId}/ask`,
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+								Accept: "text/event-stream",
+							},
+							body: JSON.stringify({ question: message }),
+						}
+					);
+
+					if (!response.ok) {
+						throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+					}
+
+					const reader = response.body.getReader();
+					const decoder = new TextDecoder();
+
+					// Add assistant message placeholder
+					let assistantMessageDiv = null;
+
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+
+						const chunk = decoder.decode(value);
+						const lines = chunk.split("\n");
+
+						for (const line of lines) {
+							if (line.startsWith("event:")) {
+								const eventType = line.substring(6).trim();
+							} else if (line.startsWith("data:")) {
+								const data = line.substring(5).trim();
+
+								try {
+									const parsedData = JSON.parse(data);
+
+									if (chunk.includes("event: status")) {
+										updateTyping(parsedData);
+									} else if (chunk.includes("event: message")) {
+										if (!assistantMessageDiv) {
+											assistantMessageDiv = createStreamingMessage();
+										}
+										fullResponse += parsedData;
+										updateStreamingMessage(assistantMessageDiv, fullResponse);
+									} else if (chunk.includes("event: complete")) {
+										hideTyping();
+										break;
+									} else if (chunk.includes("event: error")) {
+										hideTyping();
+										addMessage("assistant", `❌ Error: ${parsedData}`);
+										break;
+									}
+								} catch (e) {
+									// If not JSON, ignore
+								}
+							}
+						}
+					}
+				} catch (error) {
+					console.error("Streaming error:", error);
+					hideTyping();
+					addMessage("assistant", `❌ Connection error: ${error.message}`);
+				} finally {
+					isStreaming = false;
+					sendBtn.disabled = false;
+					hideTyping();
+
+					// Reload sessions to update message count
+					await loadSessions();
+				}
+			}
+
+			// Create streaming message placeholder
+			function createStreamingMessage() {
+				const messageDiv = document.createElement("div");
+				messageDiv.className = "flex justify-start message-animation";
+
+				messageDiv.innerHTML = `
+                <div class="bg-gray-100 text-gray-800 max-w-2xl rounded-lg p-4 shadow-sm">
+                    <div class="text-sm font-medium mb-1 text-gray-600">
+                        🤖 Hadis AI
+                    </div>
+                    <div class="streaming-content prose prose-sm" style="white-space: pre-wrap;"></div>
+                </div>
+            `;
+
+				messagesContainer.appendChild(messageDiv);
+				scrollToBottom();
+				return messageDiv;
+			}
+
+			// Update streaming message
+			function updateStreamingMessage(messageDiv, content) {
+				const contentEl = messageDiv.querySelector(".streaming-content");
+				contentEl.textContent = content;
+				scrollToBottom();
+			}
+
+			// Show typing indicator
+			function showTyping(text) {
+				typingIndicator.classList.remove("hidden");
+				document.getElementById("typingText").textContent = text;
+				scrollToBottom();
+			}
+
+			// Update typing text
+			function updateTyping(text) {
+				document.getElementById("typingText").textContent = text;
+			}
+
+			// Hide typing indicator
+			function hideTyping() {
+				typingIndicator.classList.add("hidden");
+			}
+
+			// Scroll to bottom
+			function scrollToBottom() {
+				setTimeout(() => {
+					messagesContainer.scrollTop = messagesContainer.scrollHeight;
+				}, 10);
+			}
+
+			// Edit title functionality
+			editTitleBtn.addEventListener("click", () => {
+				const modal = document.getElementById("editTitleModal");
+				const titleInput = document.getElementById("titleInput");
+				titleInput.value = chatTitle.textContent;
+				modal.classList.remove("hidden");
+				titleInput.focus();
+			});
+
+			document.getElementById("cancelEditBtn").addEventListener("click", () => {
+				document.getElementById("editTitleModal").classList.add("hidden");
+			});
+
+			document
+				.getElementById("saveTitleBtn")
+				.addEventListener("click", async () => {
+					const newTitle = document.getElementById("titleInput").value.trim();
+					if (!newTitle) return;
+
+					try {
+						const response = await fetch(
+							`${serverUrl}/sessions/${currentSessionId}`,
+							{
+								method: "PUT",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({ title: newTitle }),
+							}
+						);
+
+						if (response.ok) {
+							chatTitle.textContent = newTitle;
+							document.getElementById("editTitleModal").classList.add("hidden");
+							await loadSessions();
+						} else {
+							alert("Failed to update title");
+						}
+					} catch (error) {
+						console.error("Error updating title:", error);
+						alert("Failed to update title");
+					}
+				});
+
+			// Delete chat functionality
+			deleteChatBtn.addEventListener("click", async () => {
+				if (
+					!confirm(
+						"Are you sure you want to delete this chat? This action cannot be undone."
+					)
+				) {
+					return;
+				}
+
+				try {
+					const response = await fetch(
+						`${serverUrl}/sessions/${currentSessionId}`,
+						{
+							method: "DELETE",
+						}
+					);
+
+					if (response.ok) {
+						// Reset UI
+						currentSessionId = null;
+						chatTitle.textContent = "Select a chat or start a new one";
+						chatSubtitle.textContent = "Ask questions about Islamic hadiths";
+						editTitleBtn.classList.add("hidden");
+						deleteChatBtn.classList.add("hidden");
+						messagesContainer.innerHTML = "";
+						welcomeMessage.classList.remove("hidden");
+
+						// Reload sessions
+						await loadSessions();
+					} else {
+						alert("Failed to delete chat");
+					}
+				} catch (error) {
+					console.error("Error deleting chat:", error);
+					alert("Failed to delete chat");
+				}
+			});
+
+			// Close modal on click outside
+			document
+				.getElementById("editTitleModal")
+				.addEventListener("click", (e) => {
+					if (e.target.id === "editTitleModal") {
+						document.getElementById("editTitleModal").classList.add("hidden");
+					}
+				});
+
+			// Enter key to save title
+			document.getElementById("titleInput").addEventListener("keydown", (e) => {
+				if (e.key === "Enter") {
+					document.getElementById("saveTitleBtn").click();
+				} else if (e.key === "Escape") {
+					document.getElementById("editTitleModal").classList.add("hidden");
+				}
+			});
+
+			// Event listeners
+			sendBtn.addEventListener("click", sendMessage);
+			newChatBtn.addEventListener("click", createNewChat);
+
+			// Initialize app
+			async function initApp() {
+				await checkServerHealth();
+				await loadSessions();
+
+				// Check health every 30 seconds
+				setInterval(checkServerHealth, 30000);
+			}
+
+			// Start app when page loads
+			window.addEventListener("load", initApp);
+		</script>
+	</body>
+</html>
