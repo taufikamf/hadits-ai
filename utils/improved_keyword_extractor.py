@@ -34,132 +34,16 @@ STOPWORDS = {
     'shallallahu', 'alaihi', 'wasallam', 'sallallahu', 'alaih'
 }
 
-SEMANTIC_GROUPS = {
-    'shalat': {
-        'keywords': ['shalat', 'salat', 'sholat', 'sembahyang'],
-        'description': 'Prayer and worship'
-    },
-    'puasa': {
-        'keywords': ['puasa', 'shaum', 'shiyam', 'berpuasa'],
-        'description': 'Fasting'
-    },
-    'zakat': {
-        'keywords': ['zakat', 'zakah', 'berzakat'],
-        'description': 'Obligatory charity'
-    },
-    'haji': {
-        'keywords': ['haji', 'hajj', 'ibadah haji', 'berhaji'],
-        'description': 'Pilgrimage to Mecca'
-    },
-    'umrah': {
-        'keywords': ['umrah', 'ibadah umrah', 'berumrah'],
-        'description': 'Lesser pilgrimage'
-    },
-    'halal': {
-        'keywords': ['halal', 'dihalalkan', 'menghalalkan', 'halalkan'],
-        'description': 'Permissible in Islam'
-    },
-    'haram': {
-        'keywords': ['haram', 'diharamkan', 'mengharamkan', 'dilarang'],
-        'description': 'Forbidden in Islam'
-    },
-    'riba': {
-        'keywords': ['riba', 'bertransaksi riba', 'mengambil riba'],
-        'description': 'Usury/interest'
-    },
-    'zina': {
-        'keywords': ['zina', 'berzina', 'perzinaan'],
-        'description': 'Adultery/fornication'
-    },
-    'khamr': {
-        'keywords': ['khamr', 'minuman keras', 'arak', 'mabuk'],
-        'description': 'Intoxicants'
-    },
-    'nikah': {
-        'keywords': ['nikah', 'menikah', 'pernikahan', 'perkawinan', 'menikahi'],
-        'description': 'Marriage'
-    },
-    'jihad': {
-        'keywords': ['jihad', 'berjihad', 'perjuangan'],
-        'description': 'Struggle in the path of Allah'
-    },
-    'hijrah': {
-        'keywords': ['hijrah', 'berhijrah', 'hijra'],
-        'description': 'Migration for faith'
-    },
-    'syahid': {
-        'keywords': ['syahid', 'mati syahid', 'kesyahidan'],
-        'description': 'Martyrdom'
-    },
-    'niat': {
-        'keywords': ['niat', 'berniat', 'maksud', 'diniatkan'],
-        'description': 'Intention'
-    },
-    'ikhlas': {
-        'keywords': ['ikhlas', 'keikhlasan', 'mengikhlaskan'],
-        'description': 'Sincerity'
-    },
-    'sabar': {
-        'keywords': ['sabar', 'bersabar', 'kesabaran'],
-        'description': 'Patience'
-    },
-    'taubat': {
-        'keywords': ['taubat', 'bertaubat', 'taubah'],
-        'description': 'Repentance'
-    },
-    'doa': {
-        'keywords': ['doa', 'berdoa', 'permohonan', 'memohon'],
-        'description': 'Supplication'
-    },
-    'dzikir': {
-        'keywords': ['dzikir', 'berdzikir', 'mengingat allah', 'zikir'],
-        'description': 'Remembrance of Allah'
-    },
-    'wudhu': {
-        'keywords': ['wudhu', 'berwudhu', 'bersuci'],
-        'description': 'Ablution'
-    },
-    'najis': {
-        'keywords': ['najis', 'kenajisan'],
-        'description': 'Ritual impurity'
-    },
-    'pahala': {
-        'keywords': ['pahala', 'ganjaran', 'balasan baik'],
-        'description': 'Divine reward'
-    },
-    'dosa': {
-        'keywords': ['dosa', 'maksiat', 'perbuatan dosa'],
-        'description': 'Sin'
-    },
-    'surga': {
-        'keywords': ['surga', 'jannah', 'syurga'],
-        'description': 'Paradise'
-    },
-    'neraka': {
-        'keywords': ['neraka', 'jahannam'],
-        'description': 'Hell'
-    },
-    'iman': {
-        'keywords': ['iman', 'beriman', 'keimanan'],
-        'description': 'Faith'
-    },
-    'islam': {
-        'keywords': ['islam', 'keislaman'],
-        'description': 'Submission to Allah'
-    },
-    'sedekah': {
-        'keywords': ['sedekah', 'bersedekah', 'shadaqah'],
-        'description': 'Voluntary charity'
-    },
-    'ilmu': {
-        'keywords': ['ilmu', 'menuntut ilmu', 'pengetahuan'],
-        'description': 'Knowledge'
-    },
-    'akhlak': {
-        'keywords': ['akhlak', 'budi pekerti', 'adab'],
-        'description': 'Character/morality'
+# Load semantic groups from cleaned keywords map
+with open('data/processed/keywords_map_grouped_cleaned.json', 'r') as f:
+    keywords_data = json.load(f)
+    SEMANTIC_GROUPS = {
+        group_name: {
+            'keywords': keywords_list,
+            'description': group_name.replace('_', ' ').title()
+        }
+        for group_name, keywords_list in keywords_data['keywords'].items()
     }
-}
 
 def normalize_text(text: str) -> str:
     """Enhanced text normalization for hadits content"""
