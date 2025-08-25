@@ -51,7 +51,7 @@ python embedding/embed_model.py
 Menyimpan embedding dalam database vektor:
 
 ```bash
-# Mengindeks dokumen ke ChromaDB
+# Mengindeks dokumen ke FAISS
 python indexing/build_index.py
 ```
 
@@ -162,7 +162,7 @@ python embedding/embed_model.py
 ### 5. Pengindeksan
 
 ```bash
-# Indeks dokumen ke ChromaDB
+# Indeks dokumen ke FAISS
 python indexing/build_index.py
 ```
 
@@ -201,7 +201,8 @@ Kolom yang diperlukan: `terjemah` (terjemahan Indonesia)
 - **`CSV_DIR`**: Direktori berisi file CSV (default: "data/csv")
 - **`OUTPUT_PATH`**: Path file JSON output
 - **`MODEL_NAME`**: Model embedding yang digunakan (default: "intfloat/e5-small-v2")
-- **`CHROMA_DB_PATH`**: Path database ChromaDB (default: "./db/hadits_index")
+- **`FAISS_INDEX_PATH`**: Path untuk FAISS index (default: "./db/hadits_index")
+- **`METADATA_PATH`**: Path untuk metadata JSON (default: "./db/hadits_metadata.json")
 
 ### Stopwords
 
@@ -330,7 +331,7 @@ The improved extractor recognizes these Islamic concepts:
 - **embed_model.py**: Mengubah teks menjadi vektor dengan model bahasa
 
 ### 4. Pengindeksan (`indexing/`)
-- **build_index.py**: Menyimpan embedding ke database vektor ChromaDB
+- **build_index.py**: Menyimpan embedding ke database vektor FAISS
 
 ### 5. Pencarian (`retriever/`)
 - **query_runner.py**: Melakukan pencarian semantik dan filtering

@@ -69,7 +69,7 @@ Jalankan langkah-langkah berikut secara berurutan:
    ```bash
    python indexing/build_index.py
    ```
-   Ini akan membuat database vektor di `db/hadits_index/`
+   Ini akan membuat database vektor di `db/hadits_index` (FAISS index) dan metadata di `db/hadits_metadata.json`
 
 ### Menjalankan Server
 
@@ -101,7 +101,7 @@ curl -X POST "http://localhost:8000/ask" \
   - **processed/**: File hasil pemrosesan
   - **raw/**: File mentah
   - **sessions/**: Data sesi chat
-- **db/**: Database vektor ChromaDB
+- **db/**: Database vektor FAISS
 - **embedding/**: Kode untuk membuat embedding dokumen
 - **indexing/**: Kode untuk mengindeks dokumen
 - **llm/**: Integrasi dengan model bahasa
@@ -115,7 +115,8 @@ Konfigurasi utama dapat diatur melalui variabel lingkungan atau file `.env`:
 
 ```
 GEMINI_API_KEY=your_api_key
-CHROMA_DB_PATH=./db/hadits_index
+FAISS_INDEX_PATH=./db/hadits_index
+METADATA_PATH=./db/hadits_metadata.json
 ```
 
 ## 📚 Informasi Tambahan
