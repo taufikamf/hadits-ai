@@ -16,7 +16,7 @@ from sklearn.preprocessing import normalize
 load_dotenv()
 DATA_PATH = os.getenv("DATA_CLEAN_PATH", "data/processed/hadits_docs.json")
 OUTPUT_PATH = "data/processed/hadits_embeddings.pkl"
-KEYWORDS_PATH = "data/processed/keywords_map_grouped_cleaned.json"
+KEYWORDS_PATH = "data/processed/keywords_map_grouped.json"
 MODEL_NAME = "intfloat/e5-small-v2"
 
 # ------------------------------

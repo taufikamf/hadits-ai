@@ -223,6 +223,7 @@ data/sessions/
 db/hadits_index/
 db/hadits_index_backup_*/
 retriever/db/
+db/
 
 # Large model files and embeddings
 *.pkl
