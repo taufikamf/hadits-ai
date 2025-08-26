@@ -1,0 +1,36 @@
+// Alur Ekstraksi & Pengelompokan Kata Kunci (Versi Saran)
+digraph {
+	rankdir=TB size="8,10"
+	node [color=lightblue fontname=Helvetica shape=rect style="rounded,filled"]
+	A [label="Query Pengguna"]
+	B [label="Normalisasi Teks
+(lowercase, hapus stopword,
+lematisasi ringan)"]
+	C [label="Ekstraksi Kandidat Keyword"]
+	C1 [label="Statistik (TF-IDF / YAKE)"]
+	C2 [label="Embedding Similarity
+(dengan korpus hadis)"]
+	C3 [label="Rule-based
+(Kamus istilah Islam)"]
+	D [label="Deteksi Frasa Multi-token
+(n-gram: 2–3 kata)"]
+	E [label="Synonym Expansion
+(‘haram’ → ‘mengharamkan’, dll)"]
+	F [label="Clustering Embedding
+(K-means / HDBSCAN)"]
+	G [label="Keyword Map Final"]
+	H [label="Integrasi ke Retrieval
+(Filter + FAISS Search)"]
+	A -> B
+	B -> C
+	C -> C1
+	C -> C2
+	C -> C3
+	C1 -> D
+	C2 -> D
+	C3 -> D
+	D -> E
+	E -> F
+	F -> G
+	G -> H
+}
