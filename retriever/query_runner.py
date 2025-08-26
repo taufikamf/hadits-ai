@@ -2,7 +2,9 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import chromadb
+import faiss
+import json
+import numpy as np
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
@@ -11,20 +13,43 @@ from utils import query_optimizer
 
 # --- Env & Config ---
 load_dotenv()
-DB_PATH = os.getenv("CHROMA_DB_PATH", "./db/hadits_index")
-COLLECTION_NAME = "hadits"
+INDEX_PATH = os.getenv("FAISS_INDEX_PATH", "./db/hadits_index")
+METADATA_PATH = os.getenv("METADATA_PATH", "./db/hadits_metadata.json")
 MODEL_NAME = "intfloat/e5-small-v2"
 
 # --- Init once ---
 model = SentenceTransformer(MODEL_NAME)
 
-def load_chroma_collection():
-    client = chromadb.PersistentClient(path=DB_PATH)
-    return client.get_collection(name=COLLECTION_NAME)
+# Global variables to cache loaded data
+_faiss_index = None
+_metadata = None
+
+def load_faiss_index_and_metadata():
+    """Load FAISS index and metadata once and cache them"""
+    global _faiss_index, _metadata
+    
+    if _faiss_index is None or _metadata is None:
+        # Load FAISS index
+        if not os.path.exists(INDEX_PATH):
+            raise FileNotFoundError(f"FAISS index tidak ditemukan di: {INDEX_PATH}")
+        
+        _faiss_index = faiss.read_index(INDEX_PATH)
+        
+        # Load metadata
+        if not os.path.exists(METADATA_PATH):
+            raise FileNotFoundError(f"Metadata tidak ditemukan di: {METADATA_PATH}")
+        
+        with open(METADATA_PATH, 'r', encoding='utf-8') as f:
+            _metadata = json.load(f)
+    
+    return _faiss_index, _metadata
 
 def get_query_embedding(query: str):
     embedding = model.encode([query], convert_to_numpy=True)
     embedding = normalize(embedding, axis=1)
+    # Convert to float32 and normalize for FAISS cosine similarity
+    embedding = embedding.astype('float32')
+    faiss.normalize_L2(embedding)
     return embedding
 
 def contains_all_keywords(text: str, keywords: list[str]) -> bool:
@@ -54,7 +79,7 @@ def query_hadits_return(
     min_match: int = 2
 ) -> List[Dict]:
     """
-    Melakukan pencarian hadits dengan semantic search + keyword filtering.
+    Melakukan pencarian hadits dengan semantic search + keyword filtering menggunakan FAISS.
     
     Args:
         raw_query (str): Query asli dari user
@@ -70,18 +95,27 @@ def query_hadits_return(
         optimized_query = query_optimizer.optimize_query(raw_query)
 
     embedding = get_query_embedding(optimized_query)
-    collection = load_chroma_collection()
+    index, metadata = load_faiss_index_and_metadata()
 
     # Ambil lebih banyak hasil untuk di-filter nanti
     multiplier = 4 if required_keywords else 1
-    results = collection.query(
-        query_embeddings=embedding,
-        n_results=top_k * multiplier,
-        include=["metadatas", "distances"]
-    )
+    search_k = min(top_k * multiplier, index.ntotal)  # Don't search for more than available
+    
+    # Search using FAISS - returns scores (cosine similarity) and indices
+    scores, indices = index.search(embedding, search_k)
+    
+    # Convert to lists for easier processing
+    scores = scores[0].tolist()
+    indices = indices[0].tolist()
 
     filtered = []
-    for meta, score in zip(results["metadatas"][0], results["distances"][0]):
+    for idx, score in zip(indices, scores):
+        if idx == -1:  # FAISS returns -1 for empty results
+            continue
+            
+        # Get metadata for this document
+        meta = metadata[idx]
+        
         # Post-filtering berdasarkan terjemah dengan required_keywords
         if required_keywords:
             terjemah_text = meta.get("terjemah", "")
@@ -91,7 +125,7 @@ def query_hadits_return(
         filtered.append({
             "kitab": meta["kitab"],
             "id": meta.get("id"),
-            "score": float(score),
+            "score": float(score),  # FAISS returns cosine similarity (higher is better)
             "arab": meta.get("arab_asli", ""),
             "terjemah": meta.get("terjemah", "")
         })

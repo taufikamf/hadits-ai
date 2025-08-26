@@ -221,6 +221,8 @@ data/processed/*
 data/sessions/
 db/hadits_index/
 db/hadits_index_backup_*/
+db/hadits_index  # FAISS index file
+db/hadits_metadata.json  # FAISS metadata
 retriever/db/
 
 # Large model files and embeddings

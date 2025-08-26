@@ -15,8 +15,8 @@ sentence-transformers==2.6.1
 torch==2.2.2
 transformers==4.41.1
 
-# Vector DB (ChromaDB, fallback dari FAISS)
-chromadb==0.4.24
+# Vector DB (FAISS for efficient similarity search)
+faiss-cpu==1.7.4
 
 # LLM Integration
 google-generativeai==0.8.3
