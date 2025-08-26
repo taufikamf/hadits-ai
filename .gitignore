@@ -218,6 +218,7 @@ Thumbs.db
 # Project data files (large and generated)
 data/processed/*
 !data/processed/keywords_map_grouped_cleaned.json
+!data/processed/keywords_map_grouped.json
 data/sessions/
 db/hadits_index/
 db/hadits_index_backup_*/
