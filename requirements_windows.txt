@@ -1,0 +1,42 @@
+# Windows RTX Optimized Requirements
+# Use this for Windows systems with NVIDIA GPUs
+
+# Framework API
+fastapi==0.110.1
+uvicorn==0.29.0
+sse-starlette==2.1.3
+
+# Data manipulation
+pandas==2.2.2
+numpy>=1.24.0
+
+# Web scraping
+beautifulsoup4==4.12.3
+requests==2.31.0
+
+# CUDA-enabled PyTorch (install separately with specific command)
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# torch>=2.0.0+cu118
+# torchvision>=0.15.0+cu118
+# torchaudio>=2.0.0+cu118
+
+# Embedding & ML
+sentence-transformers>=2.6.1
+transformers>=4.41.1
+scikit-learn>=1.3.0
+accelerate>=0.20.0  # For model optimization
+
+# Vector DB
+chromadb>=0.4.24
+
+# LLM Integration  
+google-generativeai==0.8.3
+
+# System utilities
+python-dotenv==1.0.1
+psutil>=5.9.0  # For system monitoring
+tqdm>=4.65.0   # Progress bars
+
+# Optional performance libraries
+# faiss-gpu  # Alternative vector search (CUDA)
+# cupy-cuda11x  # CUDA arrays (if needed)

@@ -1,0 +1,334 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import json
+import pickle
+import re
+import time
+import gc
+from pathlib import Path
+from dotenv import load_dotenv
+
+import torch
+from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
+from sklearn.preprocessing import normalize
+
+# Muat environment variable
+load_dotenv()
+DATA_PATH = os.getenv("DATA_CLEAN_PATH", "data/processed/hadits_docs.json")
+OUTPUT_PATH = "data/processed/hadits_embeddings.pkl"
+KEYWORDS_PATH = "data/processed/keywords_map_grouped_cleaned.json"
+MODEL_NAME = "intfloat/e5-small-v2"
+
+# ==============================
+# 🚀 OPTIMIZED GPU FUNCTIONS
+# ==============================
+
+def check_gpu_setup():
+    """Check and display GPU setup information"""
+    print("🔍 GPU Setup Check:")
+    print(f"PyTorch version: {torch.__version__}")
+    print(f"CUDA available: {torch.cuda.is_available()}")
+    
+    if torch.cuda.is_available():
+        print(f"CUDA version: {torch.version.cuda}")
+        gpu_name = torch.cuda.get_device_name(0)
+        gpu_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        print(f"GPU: {gpu_name}")
+        print(f"GPU Memory: {gpu_memory:.1f} GB")
+        return True
+    else:
+        print("❌ CUDA not available - using CPU (will be slow)")
+        print("💡 To enable GPU acceleration:")
+        print("   pip uninstall torch torchvision torchaudio")
+        print("   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118")
+        return False
+
+def get_optimal_device_and_batch():
+    """Determine optimal device and batch size"""
+    if torch.cuda.is_available():
+        device = "cuda"
+        # Get GPU memory and determine optimal batch size
+        gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        
+        if gpu_memory_gb >= 8:  # RTX 3060 has 12GB
+            batch_size = 64
+        elif gpu_memory_gb >= 6:
+            batch_size = 48
+        elif gpu_memory_gb >= 4:
+            batch_size = 32
+        else:
+            batch_size = 16
+            
+        print(f"✅ Using GPU with batch size: {batch_size}")
+        
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        device = "mps"
+        batch_size = 32
+        print(f"✅ Using Apple Silicon MPS with batch size: {batch_size}")
+        
+    else:
+        device = "cpu"
+        batch_size = 8
+        print(f"⚠️ Using CPU with batch size: {batch_size}")
+    
+    return device, batch_size
+
+def clear_gpu_cache():
+    """Clear GPU cache to free memory"""
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        gc.collect()
+
+# ==============================
+# 📊 DATA PROCESSING FUNCTIONS
+# ==============================
+
+def load_documents():
+    """Load hadits documents from JSON file"""
+    print(f"📖 Loading documents from: {DATA_PATH}")
+    with open(DATA_PATH, "r", encoding="utf-8") as f:
+        docs = json.load(f)
+    print(f"✅ Loaded {len(docs):,} documents")
+    return docs
+
+def load_keyword_map():
+    """Load keyword mapping for semantic tagging"""
+    print(f"🗝️ Loading keyword map from: {KEYWORDS_PATH}")
+    with open(KEYWORDS_PATH, "r", encoding="utf-8") as f:
+        keyword_map = json.load(f)
+    print(f"✅ Loaded {len(keyword_map)} keyword groups")
+    return keyword_map
+
+def build_semantic_tags(doc, keyword_map):
+    """Build semantic tags for a document based on keyword matching"""
+    tags = set()
+    teks = doc["terjemah"].lower()
+
+    for key, variants in keyword_map.items():
+        for v in variants:
+            # Use word boundary to avoid partial matches
+            pattern = rf"(?<!\w){re.escape(v)}(?!\w)" 
+            if re.search(pattern, teks):
+                tags.add(v)
+
+    return ", ".join(sorted(tags))
+
+def prepare_corpus(docs, keyword_map, show_samples=True):
+    """Prepare corpus with semantic tags in optimized format"""
+    print("🏗️ Preparing corpus with semantic tags...")
+    corpus = []
+
+    # Show sample processing for debugging
+    if show_samples:
+        print("\n📄 Sample document processing:")
+        for i, doc in enumerate(docs[:5]):
+            tags = build_semantic_tags(doc, keyword_map)
+            print(f"Doc {i+1}: {len(tags.split(', ')) if tags else 0} tags found")
+            if tags:
+                print(f"  Tags: {tags[:100]}{'...' if len(tags) > 100 else ''}")
+
+    # Process all documents with progress bar
+    processed_count = 0
+    no_tags_count = 0
+    
+    for i, doc in enumerate(tqdm(docs, desc="Processing documents")):
+        if "id" not in doc:
+            raise ValueError(f"Document {i} missing ID field")
+
+        base_text = doc["terjemah"]
+        tags = build_semantic_tags(doc, keyword_map)
+
+        if tags:
+            # Enhanced format with semantic tags
+            full_text = f"passage: {base_text}. Kata kunci penting: {tags}"
+            processed_count += 1
+        else:
+            # Fallback for documents without tags
+            full_text = f"passage: {base_text}"
+            no_tags_count += 1
+
+        corpus.append(full_text)
+
+    print(f"✅ Corpus prepared: {processed_count:,} docs with tags, {no_tags_count:,} without tags")
+    return corpus
+
+# ==============================
+# 🤖 EMBEDDING FUNCTIONS
+# ==============================
+
+def get_embedding_model():
+    """Load the sentence transformer model with optimal device"""
+    device, _ = get_optimal_device_and_batch()
+    print(f"🤖 Loading model: {MODEL_NAME}")
+    
+    start_time = time.time()
+    model = SentenceTransformer(MODEL_NAME, device=device)
+    load_time = time.time() - start_time
+    
+    print(f"✅ Model loaded in {load_time:.2f} seconds")
+    print(f"🎯 Model device: {model.device}")
+    
+    return model
+
+def embed_documents_optimized(corpus, model_name=MODEL_NAME):
+    """Create embeddings with GPU optimization and progress tracking"""
+    print(f"\n🚀 Starting optimized embedding process...")
+    print(f"📊 Total documents to embed: {len(corpus):,}")
+    
+    device, batch_size = get_optimal_device_and_batch()
+    
+    # Load model with optimal device
+    model = SentenceTransformer(model_name, device=device)
+    
+    # Pre-calculate estimated time
+    if torch.cuda.is_available():
+        # Test speed with small sample
+        print("⏱️ Testing encoding speed...")
+        test_sample = corpus[:min(10, len(corpus))]
+        start_test = time.time()
+        _ = model.encode(test_sample, convert_to_numpy=True, batch_size=batch_size)
+        test_time = time.time() - start_test
+        
+        estimated_total = (test_time / len(test_sample)) * len(corpus)
+        print(f"📈 Estimated total time: {estimated_total/60:.1f} minutes")
+        
+        clear_gpu_cache()
+    
+    # Main embedding process
+    print(f"🔄 Encoding with batch size: {batch_size}")
+    start_time = time.time()
+    
+    try:
+        embeddings = model.encode(
+            corpus, 
+            convert_to_numpy=True, 
+            normalize_embeddings=True,
+            batch_size=batch_size,
+            show_progress_bar=True,
+            device=device
+        )
+        
+        # Additional normalization for consistency
+        embeddings = normalize(embeddings, axis=1)
+        
+        total_time = time.time() - start_time
+        speed = len(corpus) / total_time
+        
+        print(f"✅ Embedding completed!")
+        print(f"⏱️ Total time: {total_time/60:.1f} minutes")
+        print(f"🚄 Speed: {speed:.1f} documents/second")
+        print(f"📐 Embedding shape: {embeddings.shape}")
+        
+        # Clear GPU memory
+        clear_gpu_cache()
+        
+        return embeddings
+        
+    except RuntimeError as e:
+        if "out of memory" in str(e):
+            print(f"❌ GPU out of memory with batch size {batch_size}")
+            print("🔄 Retrying with smaller batch size...")
+            
+            clear_gpu_cache()
+            smaller_batch = max(4, batch_size // 2)
+            
+            return model.encode(
+                corpus, 
+                convert_to_numpy=True, 
+                normalize_embeddings=True,
+                batch_size=smaller_batch,
+                show_progress_bar=True
+            )
+        else:
+            raise e
+
+def save_optimized_output(embeddings, documents):
+    """Save embeddings and documents with compression and metadata"""
+    print(f"💾 Saving results to: {OUTPUT_PATH}")
+    
+    # Create output directory if needed
+    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    
+    # Prepare data with metadata
+    save_data = {
+        "embeddings": embeddings,
+        "documents": documents,
+        "metadata": {
+            "model_name": MODEL_NAME,
+            "embedding_dim": embeddings.shape[1],
+            "total_documents": len(documents),
+            "creation_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "device_used": "cuda" if torch.cuda.is_available() else "cpu"
+        }
+    }
+    
+    start_time = time.time()
+    with open(OUTPUT_PATH, "wb") as f:
+        pickle.dump(save_data, f, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    save_time = time.time() - start_time
+    file_size = os.path.getsize(OUTPUT_PATH) / (1024**2)  # MB
+    
+    print(f"✅ Saved in {save_time:.2f} seconds")
+    print(f"📁 File size: {file_size:.1f} MB")
+    print(f"🎯 Embedding shape: {embeddings.shape}")
+
+# ==============================
+# 🎯 MAIN EXECUTION
+# ==============================
+
+def main():
+    """Main execution function with comprehensive error handling"""
+    print("🚀 OPTIMIZED HADITS EMBEDDING GENERATOR")
+    print("=" * 60)
+    
+    try:
+        # System checks
+        gpu_available = check_gpu_setup()
+        print()
+        
+        # Load data
+        docs = load_documents()
+        keyword_map = load_keyword_map()
+        print()
+        
+        # Prepare corpus
+        corpus = prepare_corpus(docs, keyword_map)
+        print()
+        
+        # Show sample corpus entries
+        print("📄 Sample corpus entries:")
+        for i in range(min(3, len(corpus))):
+            sample = corpus[i]
+            print(f"[{i+1}] {sample[:150]}{'...' if len(sample) > 150 else ''}")
+        print()
+        
+        # Generate embeddings
+        embeddings = embed_documents_optimized(corpus)
+        print()
+        
+        # Save results
+        save_optimized_output(embeddings, docs)
+        
+        print("\n" + "=" * 60)
+        print("🎉 EMBEDDING GENERATION COMPLETE!")
+        print("=" * 60)
+        
+        if not gpu_available:
+            print("\n💡 TIP: Install CUDA-enabled PyTorch for 10-50x speedup:")
+            print("pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118")
+        
+    except Exception as e:
+        print(f"\n❌ Error occurred: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Clear GPU memory on error
+        clear_gpu_cache()
+        raise
+
+if __name__ == "__main__":
+    main()

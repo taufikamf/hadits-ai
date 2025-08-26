@@ -305,104 +305,6 @@ Example response format:
 
 **Pertanyaan lanjut**: Apakah Anda ingin penjelasan lebih lanjut atau mencari hadits lainnya?"""
 
-FOLLOW_UP_PROMPT = """You are a helpful assistant specializing in Islamic Hadith knowledge.
-The user is asking for further explanation about hadiths that were previously shared. Use the following context from the previous response as your learned knowledge, inside <context></context> XML tags.
-<context>
-{context}
-</context>
-
-IMPORTANT: The user is asking for MORE DETAILED EXPLANATION about the hadiths above. You should:
-- Provide a comprehensive analysis of each hadith
-- Explain the historical context and circumstances (asbab al-hadith) if relevant
-- Discuss the practical implications and lessons learned
-- Explain key Arabic terms or concepts mentioned
-- Connect the hadiths to broader Islamic principles
-- Provide scholarly insights about the meaning and application
-
-Begin your response with: "Berikut adalah penjelasan lebih lanjut tentang hadits-hadits tersebut:"
-
-Use formal and polite **Bahasa Indonesia** when responding.
-Provide detailed, educational content that helps the user understand the deeper meaning and significance of the hadiths.
-
-End with: "Apakah ada aspek tertentu dari hadits-hadits ini yang ingin Anda pahami lebih dalam?"
-"""
-
-def is_follow_up_query(question: str) -> bool:
-    """Detect if the user is asking for further explanation of previous hadiths"""
-    follow_up_keywords = [
-        "jelaskan lebih lanjut",
-        "jelaskan lebih detail", 
-        "jelaskan lebih dalam",
-        "penjelasan lebih lanjut",
-        "penjelasan lebih detail",
-        "bisa dijelaskan lebih",
-        "tolong jelaskan lebih",
-        "mohon penjelasan lebih",
-        "apa maksud",
-        "apa arti",
-        "bagaimana maksudnya",
-        "bisa diperjelas",
-        "perjelas",
-        "detail",
-        "lebih lanjut",
-        "lebih dalam",
-        "boleh dijelaskan",
-        "boleh jelaskan lebih",
-        "jelaskan tentang hadis tersebut",
-        "jelaskan tentang hadits tersebut", 
-        "hadis tadi",
-        "hadits tadi",
-        "hadis sebelumnya",
-        "hadits sebelumnya",
-        "hadis yang tadi",
-        "hadits yang tadi"
-    ]
-    
-    question_lower = question.lower().strip()
-    
-    # Check for exact matches or partial matches
-    for keyword in follow_up_keywords:
-        if keyword in question_lower:
-            return True
-    
-    # Additional pattern matching for short queries that are likely follow-ups
-    if len(question_lower.split()) <= 4:
-        short_follow_ups = [
-            "jelaskan",
-            "dijelaskan", 
-            "maksudnya",
-            "artinya",
-            "bagaimana",
-            "kenapa",
-            "mengapa"
-        ]
-        for keyword in short_follow_ups:
-            if question_lower.startswith(keyword) or question_lower == keyword:
-                return True
-    
-    return False
-
-def extract_previous_hadith_context(session_messages: List[ChatMessage]) -> str:
-    """Extract hadith context from the last assistant message"""
-    if not session_messages:
-        return ""
-    
-    # Find the last assistant message
-    last_assistant_message = None
-    for message in reversed(session_messages):
-        if message.role == "assistant":
-            last_assistant_message = message
-            break
-    
-    if not last_assistant_message:
-        return ""
-    
-    # Extract content that looks like hadith information
-    content = last_assistant_message.content
-    
-    # Return the full content as context for follow-up
-    return content
-
 async def format_sse_message(event_type: str, data: str) -> str:
     """Format message according to SSE specification"""
     return f"event: {event_type}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
@@ -444,7 +346,7 @@ Terjemah: {terjemah_text}
     
     return "\n".join(context_parts)
 
-async def generate_llm_response(question: str, context: str, is_follow_up: bool = False) -> AsyncGenerator[str, None]:
+async def generate_llm_response(question: str, context: str) -> AsyncGenerator[str, None]:
     
     if not GEMINI_API_KEY:
         yield await format_sse_message("error", "LLM service tidak tersedia. API key tidak dikonfigurasi.")
@@ -453,18 +355,14 @@ async def generate_llm_response(question: str, context: str, is_follow_up: bool 
     try:
         model = genai.GenerativeModel('gemini-2.5-flash')
         
-        # Choose prompt based on whether this is a follow-up query
-        if is_follow_up:
-            full_prompt = FOLLOW_UP_PROMPT.format(context=context) + f"\n\nPertanyaan follow-up: {question}"
-        else:
-            full_prompt = SYSTEM_PROMPT.format(context=context) + f"\n\nPertanyaan: {question}"
+        full_prompt = SYSTEM_PROMPT.format(context=context) + f"\n\nPertanyaan: {question}"
         
         response = model.generate_content(
             full_prompt,
             stream=True,
             generation_config=genai.types.GenerationConfig(
                 temperature=0.3,  # Lower temperature for more stable output
-                max_output_tokens=3000,  # Increased for detailed follow-up explanations
+                max_output_tokens=2500,  # Increased token limit to prevent truncated responses
                 top_p=0.9,
                 top_k=40,
             )
@@ -496,68 +394,40 @@ async def stream_hadits_response(question: str, session_id: str = None) -> Async
         
         yield await format_sse_message("status", "Memproses pertanyaan Anda...")
         
-        # Check if this is a follow-up query
-        is_follow_up = is_follow_up_query(question)
-        context = ""
+        yield await format_sse_message("status", "Mengoptimalkan query pencarian...")
+        optimized_query, required_keywords = query_optimizer.optimize_query(question, return_keywords=True)
         
-        if is_follow_up and session_id:
-            # For follow-up queries, use previous hadith context from session
-            yield await format_sse_message("status", "Mengambil konteks hadits sebelumnya...")
-            
-            session = session_manager.get_session(session_id)
-            if session and session.messages:
-                context = extract_previous_hadith_context(session.messages)
-                
-                if context:
-                    logger.info(f"Follow-up detected. Using previous context: {len(context)} characters")
-                    yield await format_sse_message("retrieval_complete", "Menggunakan hadits dari konteks sebelumnya")
-                else:
-                    # Fallback to regular search if no previous context found
-                    is_follow_up = False
-                    logger.info("Follow-up detected but no previous context found, falling back to regular search")
-            else:
-                is_follow_up = False
-                logger.info("Follow-up detected but no session found, falling back to regular search")
+        logger.info(f"Original question: {question}")
+        logger.info(f"Optimized query: {optimized_query}")
+        logger.info(f"Keywords: {required_keywords}")
         
-        if not is_follow_up:
-            # Regular hadith search
-            yield await format_sse_message("status", "Mengoptimalkan query pencarian...")
-            optimized_query, required_keywords = query_optimizer.optimize_query(question, return_keywords=True)
-            
-            logger.info(f"Original question: {question}")
-            logger.info(f"Optimized query: {optimized_query}")
-            logger.info(f"Keywords: {required_keywords}")
-            
-            yield await format_sse_message("status", "Mencari hadits yang relevan...")
-            
-            # Import query_runner here since it's not imported globally
-            from retriever import query_runner
-            
-            hadiths = query_runner.query_hadits_return(
-                raw_query=question,
-                optimized_query=optimized_query,
-                top_k=5,
-                required_keywords=required_keywords,
-                min_match=2
-            )
-            
-            logger.info(f"Found {len(hadiths)} hadiths")
-            
-            context = prepare_context_from_hadiths(hadiths)
-            
-            # Log jumlah hadits dalam konteks
-            context_hadits_count = context.count("Kitab:")
-            logger.info(f"Jumlah hadits dalam konteks: {context_hadits_count} dari total {len(hadiths)}")
-            
-            yield await format_sse_message("retrieval_complete", f"Ditemukan {len(hadiths)} hadits relevan")
+        yield await format_sse_message("status", "Mencari hadits yang relevan...")
+        
+        # Import query_runner here since it's not imported globally
+        from retriever import query_runner
+        
+        hadiths = query_runner.query_hadits_return(
+            raw_query=question,
+            optimized_query=optimized_query,
+            top_k=5,
+            required_keywords=required_keywords,
+            min_match=2
+        )
+        
+        logger.info(f"Found {len(hadiths)} hadiths")
+        
+        context = prepare_context_from_hadiths(hadiths)
+        
+        # Log jumlah hadits dalam konteks
+        context_hadits_count = context.count("Kitab:")
+        logger.info(f"Jumlah hadits dalam konteks: {context_hadits_count} dari total {len(hadiths)}")
+        
+        yield await format_sse_message("retrieval_complete", f"Ditemukan {len(hadiths)} hadits relevan")
         
         if GEMINI_API_KEY:
-            if is_follow_up:
-                yield await format_sse_message("status", "Menyusun penjelasan detail...")
-            else:
-                yield await format_sse_message("status", "Menyusun respons...")
+            yield await format_sse_message("status", "Menyusun respons...")
             
-            async for llm_chunk in generate_llm_response(question, context, is_follow_up=is_follow_up):
+            async for llm_chunk in generate_llm_response(question, context):
                 if llm_chunk.startswith("event: message"):
                     lines = llm_chunk.split('\n')
                     for line in lines:
@@ -577,28 +447,18 @@ async def stream_hadits_response(question: str, session_id: str = None) -> Async
         else:
             yield await format_sse_message("status", "LLM tidak tersedia, menampilkan hasil pencarian...")
             
-            if is_follow_up:
-                if context:
-                    full_response = f"Konteks hadits sebelumnya:\n\n{context}\n\nMohon maaf, LLM tidak tersedia untuk memberikan penjelasan detail. Silakan gunakan konteks hadits di atas."
-                    yield await format_sse_message("message", full_response)
-                else:
-                    full_response = "Maaf, tidak ada konteks hadits sebelumnya yang dapat dijelaskan dan LLM tidak tersedia."
-                    yield await format_sse_message("message", full_response)
+            if hadiths:
+                response_text = f"Ditemukan {len(hadiths)} hadits untuk pertanyaan: {question}\n\n"
+                for i, hadith in enumerate(hadiths, 1):
+                    response_text += f"{i}. **{hadith.get('kitab', 'Unknown')}** (ID: {hadith.get('id', 'Unknown')})\n"
+                    response_text += f"   - Arab: {hadith.get('arab', 'Tidak tersedia')}\n"
+                    response_text += f"   - Terjemah: {hadith.get('terjemah', 'Tidak tersedia')}\n\n"
+                
+                full_response = response_text
+                yield await format_sse_message("message", response_text)
             else:
-                hadiths = []  # Initialize in case not set in follow-up path
-                if 'hadiths' in locals():
-                    if hadiths:
-                        response_text = f"Ditemukan {len(hadiths)} hadits untuk pertanyaan: {question}\n\n"
-                        for i, hadith in enumerate(hadiths, 1):
-                            response_text += f"{i}. **{hadith.get('kitab', 'Unknown')}** (ID: {hadith.get('id', 'Unknown')})\n"
-                            response_text += f"   - Arab: {hadith.get('arab', 'Tidak tersedia')}\n"
-                            response_text += f"   - Terjemah: {hadith.get('terjemah', 'Tidak tersedia')}\n\n"
-                        
-                        full_response = response_text
-                        yield await format_sse_message("message", response_text)
-                    else:
-                        full_response = "Maaf, tidak ditemukan hadits yang relevan untuk pertanyaan Anda."
-                        yield await format_sse_message("message", full_response)
+                full_response = "Maaf, tidak ditemukan hadits yang relevan untuk pertanyaan Anda."
+                yield await format_sse_message("message", full_response)
             
             yield await format_sse_message("complete", "Pencarian selesai")
         
