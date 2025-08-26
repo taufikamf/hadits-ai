@@ -1,0 +1,44 @@
+# AMD Ryzen 9950X CPU Optimized Requirements
+# High-performance CPU-only version for AMD Ryzen processors
+
+# Framework API
+fastapi==0.110.1
+uvicorn==0.29.0
+sse-starlette==2.1.3
+
+# Data manipulation & processing
+pandas==2.2.2
+numpy>=1.24.0
+
+# Web scraping
+beautifulsoup4==4.12.3
+requests==2.31.0
+
+# CPU-optimized PyTorch (latest stable)
+torch>=2.2.0+cpu
+torchvision>=0.17.0+cpu
+torchaudio>=2.2.0+cpu
+# Install command: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Embedding & ML libraries
+sentence-transformers>=2.6.1
+transformers>=4.41.1
+scikit-learn>=1.3.0
+accelerate>=0.20.0
+
+# Vector storage
+faiss-cpu>=1.7.4  # CPU-optimized FAISS
+chromadb>=0.4.24
+
+# LLM Integration
+google-generativeai==0.8.3
+
+# System utilities & optimization
+python-dotenv==1.0.1
+psutil>=5.9.0      # System monitoring & optimization
+tqdm>=4.65.0       # Progress bars
+multiprocess>=0.70.15  # Enhanced multiprocessing
+
+# CPU optimization libraries
+mkl>=2023.0        # Intel Math Kernel Library (works on AMD)
+openblas>=0.3.26  # Latest 0.3.x series for stability
