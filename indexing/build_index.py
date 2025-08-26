@@ -8,7 +8,7 @@ import faiss
 import chromadb
 from chromadb.config import Settings
 from tqdm import tqdm
-from embedding.embed_model import build_semantic_tags, load_keyword_map
+from embedding.embed_model_optimized import build_semantic_tags, load_keyword_map
 
 # Muat environment
 load_dotenv()

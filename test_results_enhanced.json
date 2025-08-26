@@ -1,0 +1,27 @@
+{
+  "Enhanced Keyword Extraction": {
+    "success": true,
+    "message": "{'shalat': ['bersabda shalat', 'dan shalat', 'daripada shalat', 'shalat', 'shalat berjamaah', 'shalat sendirian'], 'zakat': ['tentang zakat', 'zakat', 'zakat adalah', 'zakat zakat'], 'puasa': ['berpuasa', 'berpuasa pada', 'puasa', 'yang berpuasa'], 'islam': ['islam', 'islam yang', 'rukun islam'], 'iman': ['dengan iman', 'iman', 'iman dan'], 'rasulullah': ['rasulullah'], 'rasulullah saw': ['rasulullah saw']}",
+    "duration": 0.5278496742248535
+  },
+  "Enhanced Document Embedding": {
+    "success": false,
+    "message": "No module named 'dotenv'",
+    "duration": 0.005997896194458008
+  },
+  "Enhanced Index Building": {
+    "success": false,
+    "message": "Embeddings not found",
+    "duration": 0.0010044574737548828
+  },
+  "Query Retrieval System": {
+    "success": false,
+    "message": "SentenceTransformer model not available",
+    "duration": 0.0739736557006836
+  },
+  "Full API Integration": {
+    "success": true,
+    "message": "API integration components working",
+    "duration": 0.053260087966918945
+  }
+}
