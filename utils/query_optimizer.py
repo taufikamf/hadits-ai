@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load keyword map
-KEYWORD_PATH = "data/processed/keywords_map_grouped_cleaned.json"
+KEYWORD_PATH = "data/processed/keywords_map_grouped.json"
 with open(KEYWORD_PATH, "r", encoding="utf-8") as f:
     data = json.load(f)
     KEYWORDS_MAP = data["keywords"]  # Akses bagian keywords dari JSON

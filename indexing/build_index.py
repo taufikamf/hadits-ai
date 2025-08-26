@@ -4,6 +4,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from dotenv import load_dotenv
+import faiss
 import chromadb
 from chromadb.config import Settings
 from tqdm import tqdm
@@ -11,13 +12,55 @@ from embedding.embed_model import build_semantic_tags, load_keyword_map
 
 # Muat environment
 load_dotenv()
-DB_PATH = os.getenv("CHROMA_DB_PATH", "./db/hadits_index")
+# DB_PATH = os.getenv("CHROMA_DB_PATH", "./db/hadits_index")
+DB_PATH = os.getenv("FAISS_INDEX_PATH", "./db/hadits_faiss.index")
 EMBEDDING_PATH = "data/processed/hadits_embeddings.pkl"
+METADATA_PATH = os.getenv("FAISS_METADATA_PATH", "./db/hadits_metadata.pkl")
 
 def load_embeddings(pkl_path: str):
     with open(pkl_path, "rb") as f:
         data = pickle.load(f)
     return data["embeddings"], data["documents"]
+
+def index_to_faiss(embeddings, documents, batch_size=5000):
+
+    if DB_PATH:
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    if METADATA_PATH:
+        os.makedirs(os.path.dirname(METADATA_PATH), exist_ok=True)
+
+    dim = embeddings.shape[1]
+    index = faiss.IndexFlatIP(dim)  # Using cosine similarity (inner product)
+    keyword_map = load_keyword_map()
+    metadatas = []
+
+    print(f"[~] Memproses {len(documents)} dokumen dalam batch {batch_size}...")
+
+    for start_idx in tqdm(range(0, len(documents), batch_size), desc="Adding batches to FAISS"):
+        end_idx = min(start_idx + batch_size, len(documents))
+        batch_embeds = embeddings[start_idx:end_idx]
+        index.add(batch_embeds)
+
+        for i in range(start_idx, end_idx):
+            doc = documents[i]
+            tags = build_semantic_tags(doc, keyword_map)
+            if "id" not in doc:
+                raise ValueError(f"[!] Dokumen ke-{i} tidak memiliki ID.")
+            metadatas.append({
+                "id": doc["id"],
+                "kitab": doc["kitab"],
+                "arab": doc.get("arab_bersih", ""),
+                "arab_asli": doc.get("arab_asli", doc.get("arab_bersih", "")),
+                "terjemah": doc["terjemah"],
+                "tags": tags
+            })
+
+    faiss.write_index(index, DB_PATH)
+    with open(METADATA_PATH, "wb") as f:
+        pickle.dump(metadatas, f)
+    print(f"[✓] Index selesai & disimpan di: {DB_PATH}")
+    print(f"[✓] Metadata disimpan di: {METADATA_PATH}")
+    print(f"[✓] Total {len(documents)} dokumen berhasil diindeks")
 
 def index_to_chroma(embeddings, documents, collection_name="hadits", batch_size=5000):
     # Init Chroma
@@ -84,4 +127,4 @@ def index_to_chroma(embeddings, documents, collection_name="hadits", batch_size=
 
 if __name__ == "__main__":
     embeddings, documents = load_embeddings(EMBEDDING_PATH)
-    index_to_chroma(embeddings, documents)
+    index_to_faiss(embeddings, documents)
