@@ -20,7 +20,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import json
 import re
 import logging
-from typing import List, Tuple, Set, Dict
+from typing import List, Tuple, Set, Dict, Union
 
 
 # Setup logging

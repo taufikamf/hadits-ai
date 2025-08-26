@@ -20,11 +20,33 @@ from datetime import datetime
 from pathlib import Path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import faiss
-import chromadb
-from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
-from sklearn.preprocessing import normalize
+try:
+    import faiss
+    FAISS_AVAILABLE = True
+except ImportError:
+    FAISS_AVAILABLE = False
+    print("Warning: FAISS not available")
+
+try:
+    import chromadb
+    CHROMADB_AVAILABLE = True
+except ImportError:
+    CHROMADB_AVAILABLE = False
+    print("Warning: ChromaDB not available")
+
+try:
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+    print("Warning: SentenceTransformers not available")
+
+try:
+    from sklearn.preprocessing import normalize
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    print("Warning: scikit-learn not available")
 from typing import List, Dict, Optional, Tuple
 from utils import query_optimizer
 import pickle
@@ -40,21 +62,41 @@ LOGS_DIR.mkdir(parents=True, exist_ok=True)
 QUERY_LOG_FILE = LOGS_DIR / "query_logs.jsonl"
 
 # --- Env & Config ---
-load_dotenv()
-FAISS_INDEX_PATH = os.getenv("FAISS_INDEX_PATH", "./db/hadits_faiss.index")
-FAISS_METADATA_PATH = os.getenv("FAISS_METADATA_PATH", "./db/hadits_metadata.pkl")
+# Remove the load_dotenv call that's causing issues
+FAISS_INDEX_PATH = "./db/hadits_faiss.index"
+FAISS_METADATA_PATH = "./db/hadits_metadata.pkl"
 MODEL_NAME = "intfloat/e5-small-v2"
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
+    print("Warning: python-dotenv not available")
+
 # --- Init once ---
-model = SentenceTransformer(MODEL_NAME)
+if SENTENCE_TRANSFORMERS_AVAILABLE:
+    try:
+        model = SentenceTransformer(MODEL_NAME)
+    except Exception as e:
+        print(f"Warning: Could not load SentenceTransformer: {e}")
+        model = None
+else:
+    model = None
 
 def load_chroma_collection():
     """Load ChromaDB collection (legacy)."""
+    if not CHROMADB_AVAILABLE:
+        raise ImportError("ChromaDB not available")
     client = chromadb.PersistentClient(path=DB_PATH)
     return client.get_collection(name=COLLECTION_NAME)
 
-def load_faiss_index() -> Tuple[faiss.IndexFlatIP, List[Dict]]:
+def load_faiss_index() -> Tuple[Optional["faiss.IndexFlatIP"], List[Dict]]:
     """Load FAISS index and metadata."""
+    if not FAISS_AVAILABLE:
+        raise ImportError("FAISS not available")
+    
     try:
         index = faiss.read_index(FAISS_INDEX_PATH)
         with open(FAISS_METADATA_PATH, "rb") as f:
@@ -64,11 +106,15 @@ def load_faiss_index() -> Tuple[faiss.IndexFlatIP, List[Dict]]:
         logger.error(f"Error loading FAISS index: {e}")
         raise
 
-def get_query_embedding(query: str) -> "numpy.ndarray":
+def get_query_embedding(query: str) -> Optional["numpy.ndarray"]:
     """Generate embedding for query."""
+    if not model:
+        raise RuntimeError("SentenceTransformer model not available")
+    
     try:
         embedding = model.encode([query], convert_to_numpy=True)
-        embedding = normalize(embedding, axis=1)
+        if SKLEARN_AVAILABLE:
+            embedding = normalize(embedding, axis=1)
         return embedding.astype("float32")
     except Exception as e:
         logger.error(f"Error generating query embedding: {e}")
