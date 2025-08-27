@@ -1,0 +1,27 @@
+{
+  "Enhanced Keyword Extraction": {
+    "success": true,
+    "message": "{'shalat': ['bersabda shalat', 'dan shalat', 'daripada shalat', 'shalat', 'shalat berjamaah', 'shalat sendirian'], 'zakat': ['tentang zakat', 'zakat', 'zakat adalah', 'zakat zakat'], 'puasa': ['berpuasa', 'berpuasa pada', 'puasa', 'yang berpuasa'], 'iman': ['dengan iman', 'iman', 'iman dan'], 'islam': ['islam', 'islam yang', 'rukun islam'], 'rasulullah': ['rasulullah'], 'rasulullah saw': ['rasulullah saw']}",
+    "duration": 1.2429542541503906
+  },
+  "Enhanced Document Embedding": {
+    "success": false,
+    "message": "'charmap' codec can't encode characters in position 0-1: character maps to <undefined>",
+    "duration": 7.513342380523682
+  },
+  "Enhanced Index Building": {
+    "success": false,
+    "message": "'charmap' codec can't encode characters in position 0-1: character maps to <undefined>",
+    "duration": 0.4618220329284668
+  },
+  "Query Retrieval System": {
+    "success": true,
+    "message": "Query retrieval working",
+    "duration": 3.600796937942505
+  },
+  "Full API Integration": {
+    "success": true,
+    "message": "API integration components working",
+    "duration": 0.04532027244567871
+  }
+}

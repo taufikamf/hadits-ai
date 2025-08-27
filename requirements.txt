@@ -5,21 +5,35 @@ sse-starlette==2.1.3
 
 # Data manipulation
 pandas==2.2.2
+numpy>=1.24.0
 
 # Web scraping
 beautifulsoup4==4.12.3
 requests==2.31.0
 
-# Embedding
+# Embedding & ML
 sentence-transformers==2.6.1
 torch==2.2.2
 transformers==4.41.1
+scikit-learn>=1.3.0
 
-# Vector DB (ChromaDB, fallback dari FAISS)
+# Vector DB (FAISS + ChromaDB)
+faiss-cpu>=1.7.4  # Use faiss-gpu for GPU support
 chromadb==0.4.24
 
 # LLM Integration
 google-generativeai==0.8.3
 
-# Env handling
+# Utilities
 python-dotenv==1.0.1
+tqdm>=4.65.0
+regex>=2023.0.0
+
+# Development & Testing
+pytest>=7.0.0
+pytest-asyncio
+
+# Optional: GPU Acceleration
+# Uncomment for GPU support:
+# faiss-gpu>=1.7.4  # Replace faiss-cpu with this
+# torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
