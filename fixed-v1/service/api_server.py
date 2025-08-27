@@ -11,7 +11,6 @@ Features:
 - CORS support
 - Request validation
 - Error handling
-- API rate limiting
 - Health monitoring
 
 Author: Hadith AI Team - Fixed V1
@@ -21,14 +20,18 @@ Date: 2024
 import json
 import time
 import logging
+import asyncio
 from datetime import datetime
-from typing import Dict, Any, Optional
-from flask import Flask, request, jsonify, session
+from typing import Dict, Any, Optional, AsyncGenerator
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, InternalServerError
 
 # Import our service
-from hadith_ai_service import HadithAIService, ServiceConfig, ChatResponse
+try:
+    from .hadith_ai_service import HadithAIService, ServiceConfig, ChatResponse
+except ImportError:
+    from hadith_ai_service import HadithAIService, ServiceConfig, ChatResponse
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -36,39 +39,6 @@ logger = logging.getLogger(__name__)
 
 # Global service instance
 hadith_service = None
-
-
-def create_app(service_config: ServiceConfig = None) -> Flask:
-    """
-    Create and configure Flask application.
-    
-    Args:
-        service_config (ServiceConfig, optional): Service configuration
-        
-    Returns:
-        Flask: Configured Flask app
-    """
-    app = Flask(__name__)
-    app.secret_key = 'hadith_ai_secret_key_v1'  # Change in production
-    
-    # Enable CORS for cross-origin requests
-    CORS(app, supports_credentials=True)
-    
-    # Initialize service
-    global hadith_service
-    try:
-        logger.info("Initializing Hadith AI Service...")
-        hadith_service = HadithAIService(service_config)
-        logger.info("Service initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize service: {e}")
-        raise
-    
-    return app
-
-
-# Create Flask app
-app = create_app()
 
 
 def validate_request_data(required_fields: list, data: dict) -> Optional[str]:
@@ -152,337 +122,541 @@ def convert_chat_response_to_dict(chat_response: ChatResponse) -> Dict[str, Any]
     }
 
 
-# API Routes
-
-@app.route('/', methods=['GET'])
-def home():
-    """Home endpoint with API information."""
-    return format_api_response(
-        success=True,
-        data={
-            "service": "Hadith AI API - Fixed V1",
-            "version": "1.0.0",
-            "description": "Enhanced Hadith retrieval and question answering API",
-            "endpoints": {
-                "GET /": "API information",
-                "GET /health": "Service health check",
-                "POST /session/create": "Create new chat session",
-                "POST /chat": "Process chat query",
-                "GET /session/{session_id}/stats": "Get session statistics",
-                "POST /query": "Simple query without session"
-            }
-        },
-        message="Hadith AI API is running"
-    )
-
-
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint."""
-    try:
-        health_data = hadith_service.get_service_health()
+def create_app(service_config: ServiceConfig = None) -> Flask:
+    """
+    Create and configure Flask application.
+    
+    Args:
+        service_config (ServiceConfig, optional): Service configuration
         
-        if health_data['status'] == 'healthy':
-            return format_api_response(
-                success=True,
-                data=health_data,
-                message="Service is healthy"
-            )
-        else:
-            return format_api_response(
-                success=False,
-                data=health_data,
-                error="Service is not fully healthy",
-                status_code=503
-            )
-            
+    Returns:
+        Flask: Configured Flask app
+    """
+    app = Flask(__name__)
+    app.secret_key = 'hadith_ai_secret_key_v1'  # Change in production
+    
+    # Enable CORS for cross-origin requests
+    CORS(app, supports_credentials=True)
+    
+    # Initialize service
+    global hadith_service
+    try:
+        logger.info("Initializing Hadith AI Service...")
+        hadith_service = HadithAIService(service_config)
+        logger.info("Service initialized successfully")
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return format_api_response(
-            success=False,
-            error=f"Health check failed: {str(e)}",
-            status_code=500
-        )
-
-
-@app.route('/session/create', methods=['POST'])
-def create_session():
-    """Create a new chat session."""
-    try:
-        session_id = hadith_service.create_session()
-        
+        logger.error(f"Failed to initialize service: {e}")
+        raise
+    
+    # API Routes
+    @app.route('/', methods=['GET'])
+    def home():
+        """Home endpoint with API information."""
         return format_api_response(
             success=True,
             data={
-                "session_id": session_id,
-                "created_at": datetime.now().isoformat()
+                "service": "Hadith AI API - Fixed V1",
+                "version": "1.0.0",
+                "description": "Enhanced Hadith retrieval and question answering API with LLM generation",
+                "endpoints": {
+                    "GET /": "API information",
+                    "GET /health": "Service health check",
+                    "POST /session/create": "Create new chat session",
+                    "POST /chat": "Process chat query (basic)",
+                    "POST /chat/async": "Process chat query with enhanced LLM generation",
+                    "POST /chat/stream": "Process chat query with streaming response",
+                    "GET /session/{session_id}/stats": "Get session statistics",
+                    "POST /query": "Simple query without session",
+                    "GET /greeting": "Get greeting message"
+                },
+                "features": [
+                    "Enhanced keyword extraction",
+                    "Semantic retrieval with FAISS",
+                    "LLM response generation",
+                    "Streaming responses",
+                    "Session management",
+                    "Multi-factor scoring"
+                ]
             },
-            message="Session created successfully"
+            message="Hadith AI API is running"
         )
+
+    @app.route('/health', methods=['GET'])
+    def health_check():
+        """Health check endpoint."""
+        try:
+            health_data = hadith_service.get_service_health()
+            
+            if health_data['status'] == 'healthy':
+                return format_api_response(
+                    success=True,
+                    data=health_data,
+                    message="Service is healthy"
+                )
+            else:
+                return format_api_response(
+                    success=False,
+                    data=health_data,
+                    error="Service is not fully healthy",
+                    status_code=503
+                )
+                
+        except Exception as e:
+            logger.error(f"Health check failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Health check failed: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/session/create', methods=['POST'])
+    def create_session():
+        """Create a new chat session."""
+        try:
+            session_id = hadith_service.create_session()
+            
+            return format_api_response(
+                success=True,
+                data={
+                    "session_id": session_id,
+                    "created_at": datetime.now().isoformat()
+                },
+                message="Session created successfully"
+            )
+            
+        except Exception as e:
+            logger.error(f"Session creation failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Failed to create session: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/chat', methods=['POST'])
+    def chat():
+        """
+        Process a chat query with session management.
         
-    except Exception as e:
-        logger.error(f"Session creation failed: {e}")
-        return format_api_response(
-            success=False,
-            error=f"Failed to create session: {str(e)}",
-            status_code=500
-        )
+        Expected JSON payload:
+        {
+            "query": "Your question here",
+            "session_id": "optional_session_id",
+            "max_results": 5
+        }
+        """
+        try:
+            # Validate request
+            if not request.is_json:
+                return format_api_response(
+                    success=False,
+                    error="Request must be JSON",
+                    status_code=400
+                )
+            
+            data = request.get_json()
+            
+            # Validate required fields
+            validation_error = validate_request_data(['query'], data)
+            if validation_error:
+                return format_api_response(
+                    success=False,
+                    error=validation_error,
+                    status_code=400
+                )
+            
+            query = data['query'].strip()
+            session_id = data.get('session_id')
+            max_results = data.get('max_results', 5)
+            
+            # Validate max_results
+            if not isinstance(max_results, int) or max_results < 1 or max_results > 20:
+                return format_api_response(
+                    success=False,
+                    error="max_results must be an integer between 1 and 20",
+                    status_code=400
+                )
+            
+            # Process query
+            chat_response = hadith_service.process_query(
+                query=query,
+                session_id=session_id,
+                max_results=max_results
+            )
+            
+            # Convert to serializable format
+            response_data = convert_chat_response_to_dict(chat_response)
+            
+            if chat_response.success:
+                return format_api_response(
+                    success=True,
+                    data=response_data,
+                    message="Query processed successfully"
+                )
+            else:
+                return format_api_response(
+                    success=False,
+                    data=response_data,
+                    error="Query processing failed",
+                    status_code=400
+                )
+            
+        except BadRequest as e:
+            return format_api_response(
+                success=False,
+                error=f"Bad request: {str(e)}",
+                status_code=400
+            )
+        except Exception as e:
+            logger.error(f"Chat processing failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Internal server error: {str(e)}",
+                status_code=500
+            )
 
+    @app.route('/query', methods=['POST'])
+    def simple_query():
+        """
+        Simple query endpoint without session management.
+        
+        Expected JSON payload:
+        {
+            "query": "Your question here",
+            "max_results": 5
+        }
+        """
+        try:
+            # Validate request
+            if not request.is_json:
+                return format_api_response(
+                    success=False,
+                    error="Request must be JSON",
+                    status_code=400
+                )
+            
+            data = request.get_json()
+            
+            # Validate required fields
+            validation_error = validate_request_data(['query'], data)
+            if validation_error:
+                return format_api_response(
+                    success=False,
+                    error=validation_error,
+                    status_code=400
+                )
+            
+            query = data['query'].strip()
+            max_results = data.get('max_results', 5)
+            
+            # Validate max_results
+            if not isinstance(max_results, int) or max_results < 1 or max_results > 20:
+                return format_api_response(
+                    success=False,
+                    error="max_results must be an integer between 1 and 20",
+                    status_code=400
+                )
+            
+            # Process query without session
+            chat_response = hadith_service.process_query(
+                query=query,
+                max_results=max_results
+            )
+            
+            # Convert to serializable format
+            response_data = convert_chat_response_to_dict(chat_response)
+            
+            if chat_response.success:
+                return format_api_response(
+                    success=True,
+                    data=response_data,
+                    message="Query processed successfully"
+                )
+            else:
+                return format_api_response(
+                    success=False,
+                    data=response_data,
+                    error="Query processing failed",
+                    status_code=400
+                )
+            
+        except Exception as e:
+            logger.error(f"Simple query failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Internal server error: {str(e)}",
+                status_code=500
+            )
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    """
-    Process a chat query with session management.
+    @app.route('/session/<session_id>/stats', methods=['GET'])
+    def get_session_stats(session_id: str):
+        """Get statistics for a specific session."""
+        try:
+            stats = hadith_service.get_session_stats(session_id)
+            
+            if "error" in stats:
+                return format_api_response(
+                    success=False,
+                    error=stats["error"],
+                    status_code=404
+                )
+            
+            return format_api_response(
+                success=True,
+                data=stats,
+                message="Session statistics retrieved successfully"
+            )
+            
+        except Exception as e:
+            logger.error(f"Session stats retrieval failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Failed to retrieve session stats: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/chat/stream', methods=['POST'])
+    def chat_stream():
+        """
+        Process a chat query with streaming response.
+        
+        Expected JSON payload:
+        {
+            "query": "Your question here",
+            "session_id": "optional_session_id",
+            "max_results": 5
+        }
+        """
+        try:
+            # Validate request
+            if not request.is_json:
+                return format_api_response(
+                    success=False,
+                    error="Request must be JSON",
+                    status_code=400
+                )
+            
+            data = request.get_json()
+            
+            # Validate required fields
+            validation_error = validate_request_data(['query'], data)
+            if validation_error:
+                return format_api_response(
+                    success=False,
+                    error=validation_error,
+                    status_code=400
+                )
+            
+            query = data['query'].strip()
+            session_id = data.get('session_id')
+            max_results = data.get('max_results', 5)
+            
+            # Validate max_results
+            if not isinstance(max_results, int) or max_results < 1 or max_results > 20:
+                return format_api_response(
+                    success=False,
+                    error="max_results must be an integer between 1 and 20",
+                    status_code=400
+                )
+            
+            def generate_stream():
+                """Generate streaming response."""
+                try:
+                    # Create event loop for async operations
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    
+                    try:
+                        async def async_stream():
+                            async for chunk in hadith_service.generate_streaming_response(
+                                query, session_id, max_results
+                            ):
+                                yield f"data: {json.dumps({'chunk': chunk}, ensure_ascii=False)}\n\n"
+                            
+                            yield f"data: {json.dumps({'event': 'complete'}, ensure_ascii=False)}\n\n"
+                        
+                        # Run async generator
+                        async_gen = async_stream()
+                        
+                        while True:
+                            try:
+                                chunk = loop.run_until_complete(async_gen.__anext__())
+                                yield chunk
+                            except StopAsyncIteration:
+                                break
+                                
+                    finally:
+                        loop.close()
+                        
+                except Exception as e:
+                    logger.error(f"Streaming error: {e}")
+                    error_data = json.dumps({
+                        'error': f"Streaming error: {str(e)}"
+                    }, ensure_ascii=False)
+                    yield f"data: {error_data}\n\n"
+            
+            return Response(
+                generate_stream(),
+                mimetype='text/event-stream',
+                headers={
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                    'X-Accel-Buffering': 'no'
+                }
+            )
+            
+        except Exception as e:
+            logger.error(f"Chat streaming failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Internal server error: {str(e)}",
+                status_code=500
+            )
     
-    Expected JSON payload:
-    {
-        "query": "Your question here",
-        "session_id": "optional_session_id",
-        "max_results": 5
-    }
-    """
-    try:
-        # Validate request
-        if not request.is_json:
+    @app.route('/chat/async', methods=['POST'])
+    def chat_async():
+        """
+        Process a chat query asynchronously with enhanced LLM generation.
+        
+        Expected JSON payload:
+        {
+            "query": "Your question here",
+            "session_id": "optional_session_id",
+            "max_results": 5
+        }
+        """
+        try:
+            # Validate request
+            if not request.is_json:
+                return format_api_response(
+                    success=False,
+                    error="Request must be JSON",
+                    status_code=400
+                )
+            
+            data = request.get_json()
+            
+            # Validate required fields
+            validation_error = validate_request_data(['query'], data)
+            if validation_error:
+                return format_api_response(
+                    success=False,
+                    error=validation_error,
+                    status_code=400
+                )
+            
+            query = data['query'].strip()
+            session_id = data.get('session_id')
+            max_results = data.get('max_results', 5)
+            
+            # Validate max_results
+            if not isinstance(max_results, int) or max_results < 1 or max_results > 20:
+                return format_api_response(
+                    success=False,
+                    error="max_results must be an integer between 1 and 20",
+                    status_code=400
+                )
+            
+            # Process query asynchronously
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            try:
+                chat_response = loop.run_until_complete(
+                    hadith_service.process_query_async(query, session_id, max_results)
+                )
+            finally:
+                loop.close()
+            
+            # Convert to serializable format
+            response_data = convert_chat_response_to_dict(chat_response)
+            
+            if chat_response.success:
+                return format_api_response(
+                    success=True,
+                    data=response_data,
+                    message="Query processed successfully with enhanced generation"
+                )
+            else:
+                return format_api_response(
+                    success=False,
+                    data=response_data,
+                    error="Query processing failed",
+                    status_code=400
+                )
+            
+        except Exception as e:
+            logger.error(f"Async chat processing failed: {e}")
             return format_api_response(
                 success=False,
-                error="Request must be JSON",
-                status_code=400
+                error=f"Internal server error: {str(e)}",
+                status_code=500
             )
-        
-        data = request.get_json()
-        
-        # Validate required fields
-        validation_error = validate_request_data(['query'], data)
-        if validation_error:
-            return format_api_response(
-                success=False,
-                error=validation_error,
-                status_code=400
-            )
-        
-        query = data['query'].strip()
-        session_id = data.get('session_id')
-        max_results = data.get('max_results', 5)
-        
-        # Validate max_results
-        if not isinstance(max_results, int) or max_results < 1 or max_results > 20:
-            return format_api_response(
-                success=False,
-                error="max_results must be an integer between 1 and 20",
-                status_code=400
-            )
-        
-        # Process query
-        chat_response = hadith_service.process_query(
-            query=query,
-            session_id=session_id,
-            max_results=max_results
-        )
-        
-        # Convert to serializable format
-        response_data = convert_chat_response_to_dict(chat_response)
-        
-        if chat_response.success:
+
+    @app.route('/greeting', methods=['GET'])
+    def get_greeting():
+        """Get greeting message."""
+        try:
+            session_id = request.args.get('session_id')
+            greeting_response = hadith_service.get_greeting(session_id)
+            
+            response_data = convert_chat_response_to_dict(greeting_response)
+            
             return format_api_response(
                 success=True,
                 data=response_data,
-                message="Query processed successfully"
+                message="Greeting retrieved successfully"
             )
-        else:
+            
+        except Exception as e:
+            logger.error(f"Greeting retrieval failed: {e}")
             return format_api_response(
                 success=False,
-                data=response_data,
-                error="Query processing failed",
-                status_code=400
+                error=f"Failed to retrieve greeting: {str(e)}",
+                status_code=500
             )
-        
-    except BadRequest as e:
+
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found(error):
+        """Handle 404 errors."""
         return format_api_response(
             success=False,
-            error=f"Bad request: {str(e)}",
-            status_code=400
+            error="Endpoint not found",
+            status_code=404
         )
-    except Exception as e:
-        logger.error(f"Chat processing failed: {e}")
+
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        """Handle 405 errors."""
         return format_api_response(
             success=False,
-            error=f"Internal server error: {str(e)}",
+            error="Method not allowed",
+            status_code=405
+        )
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        """Handle 500 errors."""
+        logger.error(f"Internal server error: {error}")
+        return format_api_response(
+            success=False,
+            error="Internal server error",
             status_code=500
         )
 
+    # Request logging middleware
+    @app.before_request
+    def log_request_info():
+        """Log request information."""
+        logger.info(f"{request.method} {request.url} - {request.remote_addr}")
 
-@app.route('/query', methods=['POST'])
-def simple_query():
-    """
-    Simple query endpoint without session management.
+    @app.after_request
+    def log_response_info(response):
+        """Log response information."""
+        logger.info(f"Response: {response.status_code}")
+        return response
     
-    Expected JSON payload:
-    {
-        "query": "Your question here",
-        "max_results": 5
-    }
-    """
-    try:
-        # Validate request
-        if not request.is_json:
-            return format_api_response(
-                success=False,
-                error="Request must be JSON",
-                status_code=400
-            )
-        
-        data = request.get_json()
-        
-        # Validate required fields
-        validation_error = validate_request_data(['query'], data)
-        if validation_error:
-            return format_api_response(
-                success=False,
-                error=validation_error,
-                status_code=400
-            )
-        
-        query = data['query'].strip()
-        max_results = data.get('max_results', 5)
-        
-        # Validate max_results
-        if not isinstance(max_results, int) or max_results < 1 or max_results > 20:
-            return format_api_response(
-                success=False,
-                error="max_results must be an integer between 1 and 20",
-                status_code=400
-            )
-        
-        # Process query without session
-        chat_response = hadith_service.process_query(
-            query=query,
-            max_results=max_results
-        )
-        
-        # Convert to serializable format
-        response_data = convert_chat_response_to_dict(chat_response)
-        
-        if chat_response.success:
-            return format_api_response(
-                success=True,
-                data=response_data,
-                message="Query processed successfully"
-            )
-        else:
-            return format_api_response(
-                success=False,
-                data=response_data,
-                error="Query processing failed",
-                status_code=400
-            )
-        
-    except Exception as e:
-        logger.error(f"Simple query failed: {e}")
-        return format_api_response(
-            success=False,
-            error=f"Internal server error: {str(e)}",
-            status_code=500
-        )
-
-
-@app.route('/session/<session_id>/stats', methods=['GET'])
-def get_session_stats(session_id: str):
-    """Get statistics for a specific session."""
-    try:
-        stats = hadith_service.get_session_stats(session_id)
-        
-        if "error" in stats:
-            return format_api_response(
-                success=False,
-                error=stats["error"],
-                status_code=404
-            )
-        
-        return format_api_response(
-            success=True,
-            data=stats,
-            message="Session statistics retrieved successfully"
-        )
-        
-    except Exception as e:
-        logger.error(f"Session stats retrieval failed: {e}")
-        return format_api_response(
-            success=False,
-            error=f"Failed to retrieve session stats: {str(e)}",
-            status_code=500
-        )
-
-
-@app.route('/greeting', methods=['GET'])
-def get_greeting():
-    """Get greeting message."""
-    try:
-        session_id = request.args.get('session_id')
-        greeting_response = hadith_service.get_greeting(session_id)
-        
-        response_data = convert_chat_response_to_dict(greeting_response)
-        
-        return format_api_response(
-            success=True,
-            data=response_data,
-            message="Greeting retrieved successfully"
-        )
-        
-    except Exception as e:
-        logger.error(f"Greeting retrieval failed: {e}")
-        return format_api_response(
-            success=False,
-            error=f"Failed to retrieve greeting: {str(e)}",
-            status_code=500
-        )
-
-
-# Error handlers
-
-@app.errorhandler(404)
-def not_found(error):
-    """Handle 404 errors."""
-    return format_api_response(
-        success=False,
-        error="Endpoint not found",
-        status_code=404
-    )
-
-
-@app.errorhandler(405)
-def method_not_allowed(error):
-    """Handle 405 errors."""
-    return format_api_response(
-        success=False,
-        error="Method not allowed",
-        status_code=405
-    )
-
-
-@app.errorhandler(500)
-def internal_error(error):
-    """Handle 500 errors."""
-    logger.error(f"Internal server error: {error}")
-    return format_api_response(
-        success=False,
-        error="Internal server error",
-        status_code=500
-    )
-
-
-# Request logging middleware
-@app.before_request
-def log_request_info():
-    """Log request information."""
-    logger.info(f"{request.method} {request.url} - {request.remote_addr}")
-
-
-@app.after_request
-def log_response_info(response):
-    """Log response information."""
-    logger.info(f"Response: {response.status_code}")
-    return response
+    return app
 
 
 # Development server

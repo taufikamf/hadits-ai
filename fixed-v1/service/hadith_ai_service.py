@@ -19,7 +19,8 @@ Date: 2024
 import json
 import logging
 import time
-from typing import Dict, List, Optional, Any, Tuple
+import asyncio
+from typing import Dict, List, Optional, Any, Tuple, Union
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -31,6 +32,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from retrieval.enhanced_retrieval_system import EnhancedRetrievalSystem, RetrievalConfig, RetrievalResult
 from preprocessing.query_preprocessor import EnhancedQueryPreprocessor, analyze_query_intent
+from generation.enhanced_response_generator import (
+    EnhancedResponseGenerator, GenerationConfig, LLMProvider, ResponseMode, GenerationResult
+)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -66,6 +70,11 @@ class ServiceConfig:
     """Configuration for Hadith AI service."""
     # Retrieval configuration
     retrieval_config: RetrievalConfig = field(default_factory=RetrievalConfig)
+    
+    # Generation configuration
+    generation_config: GenerationConfig = field(default_factory=GenerationConfig)
+    enable_llm_generation: bool = True
+    fallback_to_simple: bool = True
     
     # Response formatting
     max_results_display: int = 5
@@ -110,6 +119,7 @@ class HadithAIService:
         # Initialize components
         self.retrieval_system = None
         self.query_preprocessor = None
+        self.response_generator = None
         
         # Session management
         self.sessions: Dict[str, ChatSession] = {}
@@ -134,6 +144,22 @@ class HadithAIService:
             self.query_preprocessor = EnhancedQueryPreprocessor(
                 self.config.retrieval_config.keywords_map_path
             )
+            
+            # Initialize response generator
+            if self.config.enable_llm_generation:
+                try:
+                    self.response_generator = EnhancedResponseGenerator(self.config.generation_config)
+                    logger.info("Response generator initialized successfully")
+                except Exception as e:
+                    logger.warning(f"Failed to initialize response generator: {e}")
+                    if not self.config.fallback_to_simple:
+                        raise
+                    else:
+                        logger.info("Continuing with simple response generation")
+                        self.response_generator = None
+            else:
+                logger.info("LLM generation disabled, using simple response formatting")
+                self.response_generator = None
             
             # Setup analytics logging
             if self.config.enable_analytics:
@@ -283,9 +309,24 @@ class HadithAIService:
             top_results = filtered_results[:max_results]
             
             # Generate response message
-            response_message = self._generate_response_message(
-                query, top_results, query_analysis
-            )
+            if self.response_generator and self.config.enable_llm_generation:
+                try:
+                    # Use async generation if available
+                    response_message = self._generate_llm_response_sync(
+                        query, top_results, query_analysis
+                    )
+                except Exception as e:
+                    logger.warning(f"LLM generation failed: {e}")
+                    if self.config.fallback_to_simple:
+                        response_message = self._generate_simple_response_message(
+                            query, top_results, query_analysis
+                        )
+                    else:
+                        raise
+            else:
+                response_message = self._generate_simple_response_message(
+                    query, top_results, query_analysis
+                )
             
             # Calculate response time
             response_time = (time.time() - start_time) * 1000
@@ -349,10 +390,74 @@ class HadithAIService:
                 metadata={"error": str(e)}
             )
     
-    def _generate_response_message(self, query: str, results: List[RetrievalResult], 
-                                 query_analysis: Dict[str, Any]) -> str:
+    def _generate_llm_response_sync(self, query: str, results: List[RetrievalResult], 
+                                   query_analysis: Dict[str, Any]) -> str:
         """
-        Generate human-friendly response message.
+        Generate response using LLM (synchronous wrapper for async method).
+        
+        Args:
+            query (str): Original query
+            results (List[RetrievalResult]): Retrieval results
+            query_analysis (Dict): Query analysis
+            
+        Returns:
+            str: Generated response message
+        """
+        try:
+            # Try to get existing event loop
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # If loop is already running, fallback to simple response
+                    logger.info("Event loop already running, falling back to simple response generation")
+                    return self._generate_simple_response_message(query, results, query_analysis)
+            except RuntimeError:
+                # No event loop exists, create a new one
+                pass
+            
+            # Create new event loop for sync context
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                generation_result = loop.run_until_complete(
+                    self.response_generator.generate_response(query, results, query_analysis)
+                )
+                
+                if generation_result.success:
+                    return generation_result.content
+                else:
+                    logger.warning(f"LLM generation failed: {generation_result.error_message}")
+                    raise Exception(generation_result.error_message)
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+                
+        except Exception as e:
+            logger.error(f"Error in LLM response generation: {e}")
+            raise
+    
+    async def generate_response_async(self, query: str, results: List[RetrievalResult], 
+                                    query_analysis: Dict[str, Any] = None) -> GenerationResult:
+        """
+        Generate response using LLM (async version).
+        
+        Args:
+            query (str): Original query
+            results (List[RetrievalResult]): Retrieval results
+            query_analysis (Dict): Query analysis
+            
+        Returns:
+            GenerationResult: Generation result with metadata
+        """
+        if not self.response_generator:
+            raise Exception("Response generator not initialized")
+        
+        return await self.response_generator.generate_response(query, results, query_analysis or {})
+    
+    def _generate_simple_response_message(self, query: str, results: List[RetrievalResult], 
+                                        query_analysis: Dict[str, Any]) -> str:
+        """
+        Generate simple human-friendly response message without LLM.
         
         Args:
             query (str): Original query
@@ -389,34 +494,248 @@ class HadithAIService:
         else:
             message_parts.append(f"\nDitemukan {len(results)} hadits:")
         
-        # Format top results
+        # Format top results with detailed hadith information
         for i, result in enumerate(results[:self.config.max_results_display], 1):
-            text = result.document.get('terjemah', '')
+            doc = result.document
             
-            # Truncate text if too long
-            if len(text) > self.config.result_text_preview_length:
-                text = text[:self.config.result_text_preview_length] + "..."
+            # Format each hadith clearly
+            message_parts.append(f"\n**Hadits {i}:**")
+            message_parts.append(f"- **Kitab**: {doc.get('kitab', 'Unknown')}")
+            message_parts.append(f"- **ID**: {doc.get('id', 'Unknown')}")
             
-            message_parts.append(f"\n[{i}] {text}")
+            # Add Arabic text if available
+            arab_text = doc.get('arab', '')
+            if arab_text:
+                if len(arab_text) > 300:
+                    arab_text = arab_text[:300] + "... (teks diperpendek)"
+                message_parts.append(f"- **Arab**: {arab_text}")
+            
+            # Add translation
+            terjemah = doc.get('terjemah', '')
+            if len(terjemah) > self.config.result_text_preview_length:
+                terjemah = terjemah[:self.config.result_text_preview_length] + "..."
+            message_parts.append(f"- **Terjemah**: {terjemah}")
             
             # Add keywords if available
             if result.matched_keywords:
                 keywords_str = ", ".join(result.matched_keywords[:5])
-                message_parts.append(f"    💡 Kata kunci: {keywords_str}")
+                message_parts.append(f"- **Kata kunci**: {keywords_str}")
             
             # Add confidence indicator for high-confidence results
             if result.score >= self.config.high_confidence_threshold:
-                message_parts.append("    ✅ Hasil dengan kepercayaan tinggi")
+                message_parts.append("- ✅ **Hasil dengan kepercayaan tinggi**")
+            
+            message_parts.append("")  # Empty line between hadits
         
         # Add helpful note
         if len(results) > self.config.max_results_display:
             remaining = len(results) - self.config.max_results_display
-            message_parts.append(f"\n\n📝 Catatan: Masih ada {remaining} hadits lainnya yang relevan.")
+            message_parts.append(f"📝 **Catatan**: Masih ada {remaining} hadits lainnya yang relevan.")
+            message_parts.append("")
+        
+        # Add summary and follow-up
+        message_parts.append("**Ringkasan**: Hadits-hadits di atas memberikan panduan tentang topik yang Anda tanyakan.")
+        message_parts.append("")
         
         if islamic_strength > 0.3:
-            message_parts.append("\n\n🤲 Semoga bermanfaat untuk memahami ajaran Islam.")
+            message_parts.append("🤲 Semoga bermanfaat untuk memahami ajaran Islam.")
+        
+        message_parts.append("**Pertanyaan lanjut**: Apakah Anda ingin penjelasan lebih detail atau mencari hadits dengan topik lain?")
         
         return "\n".join(message_parts)
+    
+    async def process_query_async(self, query: str, session_id: str = None, 
+                                max_results: int = None) -> ChatResponse:
+        """
+        Process a user query asynchronously with LLM generation.
+        
+        Args:
+            query (str): User query
+            session_id (str, optional): Session ID
+            max_results (int, optional): Maximum results to return
+            
+        Returns:
+            ChatResponse: Formatted response
+        """
+        start_time = time.time()
+        max_results = max_results or self.config.max_results_display
+        
+        try:
+            logger.info(f"Processing async query: '{query}' (session: {session_id})")
+            
+            # Update session activity
+            if session_id:
+                self.update_session_activity(session_id)
+            
+            # Validate query
+            if not query or not query.strip():
+                return ChatResponse(
+                    success=False,
+                    message="Silakan masukkan pertanyaan yang valid.",
+                    session_id=session_id
+                )
+            
+            # Analyze query intent
+            query_analysis = analyze_query_intent(query)
+            
+            # Perform retrieval
+            retrieval_results = self.retrieval_system.retrieve(query, top_k=max_results * 2)
+            
+            # Filter results by confidence
+            filtered_results = [
+                result for result in retrieval_results 
+                if result.score >= self.config.min_confidence_threshold
+            ]
+            
+            # Take top results
+            top_results = filtered_results[:max_results]
+            
+            # Generate response message using LLM
+            if self.response_generator and self.config.enable_llm_generation:
+                try:
+                    generation_result = await self.generate_response_async(query, top_results, query_analysis)
+                    response_message = generation_result.content if generation_result.success else self.config.error_message
+                except Exception as e:
+                    logger.warning(f"LLM generation failed: {e}")
+                    if self.config.fallback_to_simple:
+                        response_message = self._generate_simple_response_message(
+                            query, top_results, query_analysis
+                        )
+                    else:
+                        response_message = self.config.error_message
+            else:
+                response_message = self._generate_simple_response_message(
+                    query, top_results, query_analysis
+                )
+            
+            # Calculate response time
+            response_time = (time.time() - start_time) * 1000
+            
+            # Update session
+            if session_id:
+                session = self.get_session(session_id)
+                if session:
+                    session.query_count += 1
+                    session.total_results_returned += len(top_results)
+                    
+                    # Add to context history
+                    context_entry = {
+                        "query": query,
+                        "results_count": len(top_results),
+                        "timestamp": datetime.now().isoformat(),
+                        "query_analysis": query_analysis,
+                        "generation_used": self.response_generator is not None
+                    }
+                    
+                    session.context_history.append(context_entry)
+                    
+                    # Limit context history size
+                    if len(session.context_history) > self.config.max_context_history:
+                        session.context_history = session.context_history[-self.config.max_context_history:]
+            
+            # Log analytics
+            if self.config.enable_analytics:
+                self._log_query_analytics(
+                    query, query_analysis, top_results, response_time, session_id
+                )
+            
+            # Create response
+            response = ChatResponse(
+                success=True,
+                message=response_message,
+                results=top_results,
+                query_analysis=query_analysis,
+                response_time_ms=response_time,
+                session_id=session_id,
+                metadata={
+                    "total_candidates": len(retrieval_results),
+                    "filtered_candidates": len(filtered_results),
+                    "query_length": len(query.split()),
+                    "avg_result_score": sum(r.score for r in top_results) / len(top_results) if top_results else 0,
+                    "llm_generation_used": self.response_generator is not None and self.config.enable_llm_generation
+                }
+            )
+            
+            logger.info(f"Async query processed successfully: {len(top_results)} results in {response_time:.1f}ms")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error processing async query: {e}")
+            
+            response_time = (time.time() - start_time) * 1000
+            
+            return ChatResponse(
+                success=False,
+                message=self.config.error_message,
+                response_time_ms=response_time,
+                session_id=session_id,
+                metadata={"error": str(e)}
+            )
+    
+    async def generate_streaming_response(self, query: str, session_id: str = None, 
+                                        max_results: int = None):
+        """
+        Generate streaming response for real-time display.
+        
+        Args:
+            query (str): User query
+            session_id (str, optional): Session ID
+            max_results (int, optional): Maximum results to return
+            
+        Yields:
+            str: Response chunks
+        """
+        try:
+            # First get retrieval results
+            max_results = max_results or self.config.max_results_display
+            
+            # Analyze query intent
+            query_analysis = analyze_query_intent(query)
+            
+            # Perform retrieval
+            retrieval_results = self.retrieval_system.retrieve(query, top_k=max_results * 2)
+            
+            # Filter results by confidence
+            filtered_results = [
+                result for result in retrieval_results 
+                if result.score >= self.config.min_confidence_threshold
+            ]
+            
+            # Take top results
+            top_results = filtered_results[:max_results]
+            
+            # Generate streaming response
+            if self.response_generator and self.config.enable_llm_generation:
+                try:
+                    async for chunk in self.response_generator.generate_streaming_response(query, top_results):
+                        yield chunk
+                except Exception as e:
+                    logger.warning(f"Streaming generation failed: {e}")
+                    # Fallback to simple response
+                    simple_response = self._generate_simple_response_message(query, top_results, query_analysis)
+                    yield simple_response
+            else:
+                # Use simple response for streaming
+                simple_response = self._generate_simple_response_message(query, top_results, query_analysis)
+                
+                # Stream it word by word
+                words = simple_response.split()
+                current_chunk = ""
+                
+                for word in words:
+                    current_chunk += word + " "
+                    
+                    if len(current_chunk) > 50 or word.endswith(('.', '!', '?', ':')):
+                        yield current_chunk.strip()
+                        current_chunk = ""
+                        await asyncio.sleep(0.05)  # Small delay for streaming effect
+                
+                if current_chunk.strip():
+                    yield current_chunk.strip()
+                    
+        except Exception as e:
+            logger.error(f"Error in streaming response: {e}")
+            yield f"Terjadi kesalahan: {str(e)}"
     
     def _log_query_analytics(self, query: str, query_analysis: Dict[str, Any], 
                            results: List[RetrievalResult], response_time: float, 
