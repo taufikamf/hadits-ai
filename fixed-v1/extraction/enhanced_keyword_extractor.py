@@ -256,21 +256,41 @@ class EnhancedKeywordExtractor:
         
         logger.info(f"Generated {len(all_ngrams)} meaningful n-grams")
         
-        # Count frequencies
-        counter = Counter(all_ngrams)
+        # Count frequencies with progress monitoring
+        logger.info("Counting n-gram frequencies...")
+        counter = Counter()
+        
+        # Process in batches to avoid memory issues
+        batch_size = 100000
+        for i in range(0, len(all_ngrams), batch_size):
+            batch = all_ngrams[i:i + batch_size]
+            counter.update(batch)
+            if i % (batch_size * 10) == 0:
+                logger.info(f"Processed {i:,}/{len(all_ngrams):,} n-grams")
+        
+        logger.info(f"Frequency counting completed. Found {len(counter)} unique terms")
         
         # Filter by minimum frequency
         frequent_terms = {term: count for term, count in counter.items() 
                          if count >= self.min_frequency}
         
+        logger.info(f"After frequency filter (>={self.min_frequency}): {len(frequent_terms)} terms")
+        
         # Simple TF-IDF approximation if sklearn available
         if SKLEARN_AVAILABLE:
+            logger.info("Calculating TF-IDF scores...")
             total_docs = len(texts)
             tfidf_scores = {}
             
-            for ngram, freq in frequent_terms.items():
-                # Calculate document frequency
-                df = sum(1 for text in texts if ngram in self.normalize_text(text))
+            # Pre-normalize texts for faster lookup
+            normalized_texts = [self.normalize_text(text) for text in texts]
+            
+            for i, (ngram, freq) in enumerate(frequent_terms.items()):
+                if i % 100 == 0:
+                    logger.info(f"TF-IDF progress: {i}/{len(frequent_terms)} terms")
+                
+                # Calculate document frequency (faster with pre-normalized texts)
+                df = sum(1 for norm_text in normalized_texts if ngram in norm_text)
                 
                 # Calculate TF-IDF
                 tf = freq / len(all_ngrams)
@@ -441,8 +461,8 @@ def main():
     # Configuration
     JSON_DIR = Path("../data/processed/hadits_docs.json")
     OUTPUT_PATH = Path("../data/enhanced_index_v1/enhanced_keywords_map_v1.json")
-    MIN_FREQUENCY = 40
-    MAX_NGRAM = 3
+    MIN_FREQUENCY = 80  # Increase to reduce candidates
+    MAX_NGRAM = 2       # Reduce to speed up processing
     
     try:
         # Initialize enhanced extractor
