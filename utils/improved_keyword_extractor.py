@@ -71,7 +71,30 @@ class EnhancedIslamicKeywordExtractor:
         self.islamic_categories = self._get_islamic_categories()
 
     def _load_enhanced_islamic_terms(self, path: str = None) -> Set[str]:
-        """Load comprehensive Islamic terms dictionary."""
+        """Load comprehensive Islamic terms dictionary from cleaned keywords map."""
+        # Try to load from the comprehensive cleaned keywords map
+        cleaned_keywords_path = "data/processed/keywords_map_grouped_cleaned.json"
+        if Path(cleaned_keywords_path).exists():
+            try:
+                with open(cleaned_keywords_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    keywords_data = data.get('keywords', {})
+                    
+                    # Flatten all keyword groups into a single set
+                    all_terms = set()
+                    for group_name, terms_list in keywords_data.items():
+                        # Add the main group name
+                        all_terms.add(group_name)
+                        # Add all variants
+                        all_terms.update(terms_list)
+                    
+                    logger.info(f"Loaded {len(all_terms)} Islamic terms from cleaned keywords map")
+                    return all_terms
+                    
+            except Exception as e:
+                logger.warning(f"Could not load from cleaned keywords map: {e}")
+        
+        # Fallback to custom path if provided
         if path and Path(path).exists():
             try:
                 with open(path, 'r', encoding='utf-8') as f:
@@ -80,69 +103,17 @@ class EnhancedIslamicKeywordExtractor:
             except Exception as e:
                 logger.warning(f"Could not load Islamic terms from {path}: {e}")
         
-        # Comprehensive Islamic terms based on major categories
+        # Fallback to basic Islamic terms if files not available
+        logger.warning("Using fallback Islamic terms - limited coverage")
         return {
-            # Core worship practices
-            'shalat', 'salat', 'sholat', 'solat', 'mendirikan shalat', 'mengerjakan shalat',
-            'shalat lima waktu', 'shalat fardhu', 'shalat sunnah', 'shalat berjamaah',
-            'shalat subuh', 'shalat zhuhur', 'shalat ashar', 'shalat maghrib', 'shalat isya',
-            'shalat jumat', 'shalat ied', 'shalat jenazah', 'shalat tahajud', 'shalat witir',
-            
-            # Purification
-            'wudhu', 'wudu', 'bersuci', 'tayammum', 'ghusl', 'najis', 'suci', 'thaharah',
-            'air wudhu', 'membatalkan wudhu',
-            
-            # Fasting
-            'puasa', 'shaum', 'berpuasa', 'berbuka puasa', 'sahur', 'iftar',
-            'puasa ramadan', 'puasa sunnah', 'puasa wajib', 'fidyah', 'kafarat',
-            
-            # Charity
-            'zakat', 'sedekah', 'shadaqah', 'infaq', 'zakat mal', 'zakat fitrah',
-            'nisab', 'haul', 'mustahiq', 'fakir', 'miskin',
-            
-            # Pilgrimage  
-            'haji', 'umrah', 'ihram', 'tawaf', 'sai', 'wukuf', 'arafah', 'muzdalifah',
-            'mina', 'jumrah', 'tahallul', 'hady', 'dam',
-            
-            # Legal concepts
-            'halal', 'haram', 'makruh', 'sunnah', 'mustahab', 'wajib', 'fardhu', 'mubah',
-            'hukum', 'syariat', 'fiqih', 'fatwa', 'hudud', 'qisas',
-            
-            # Spiritual concepts
-            'iman', 'islam', 'ihsan', 'tauhid', 'syirik', 'kufur', 'munafik',
-            'taqwa', 'sabar', 'syukur', 'ikhlas', 'taubat', 'istighfar',
-            
-            # Ethics and behavior
-            'akhlak', 'adab', 'birrul walidain', 'silaturahmi', 'amanah', 'jujur',
-            'berbuat baik', 'tolong menolong', 'kasih sayang',
-            
-            # Marriage and family
-            'nikah', 'menikah', 'pernikahan', 'talaq', 'cerai', 'iddah', 'rujuk',
-            'mahar', 'nafkah', 'wali', 'saksi', 'walimah',
-            
-            # Business  
-            'jual beli', 'perdagangan', 'riba', 'hutang', 'piutang', 'gadai',
-            'ijarah', 'mudharabah', 'musyarakah',
-            
-            # Prohibited acts
-            'zina', 'berzina', 'khamr', 'mabuk', 'mencuri', 'membunuh', 'fitnah',
-            'ghibah', 'bohong', 'khianat',
-            
-            # Religious knowledge
-            'quran', 'al-quran', 'hadits', 'sunnah', 'wahyu', 'ayat', 'surat',
-            'tafsir', 'fiqih', 'aqidah',
-            
-            # Afterlife
-            'akhirat', 'hari kiamat', 'surga', 'neraka', 'mahsyar', 'mizan',
-            'hisab', 'shirath', 'malaikat', 'jin', 'setan',
-            
-            # Spiritual practices  
-            'doa', 'dzikir', 'tasbih', 'tahmid', 'takbir', 'tahlil',
-            'istighfar', 'talbiyah', 'berdoa',
-            
-            # Community
-            'ummah', 'jamaah', 'imam', 'khatib', 'muslim', 'muslimah',
-            'mukmin', 'kafir', 'ahli kitab', 'jihad', 'hijrah'
+            # Core terms that should always be recognized
+            'shalat', 'salat', 'sholat', 'solat', 'puasa', 'shaum', 'zakat', 'sedekah',
+            'haji', 'umrah', 'wudhu', 'wudu', 'tayammum', 'halal', 'haram', 'makruh',
+            'sunnah', 'wajib', 'fardhu', 'mubah', 'iman', 'islam', 'muslim', 'mukmin',
+            'taqwa', 'sabar', 'syukur', 'ikhlas', 'taubat', 'istighfar', 'jihad',
+            'nikah', 'menikah', 'talaq', 'cerai', 'riba', 'zina', 'khamr', 'quran',
+            'hadits', 'sunnah', 'wahyu', 'surga', 'neraka', 'akhirat', 'kiamat',
+            'doa', 'dzikir', 'tasbih', 'takbir', 'tahlil', 'malaikat', 'syahid'
         }
 
     def _get_enhanced_stopwords(self) -> Set[str]:
@@ -155,6 +126,11 @@ class EnhancedIslamicKeywordExtractor:
             'kamu', 'kalian', 'beliau', 'ada', 'seperti', 'antara', 'semua', 'setiap',
             'dalam', 'oleh', 'kepada', 'bagi', 'atas', 'bawah', 'lalu', 'kemudian',
             'setelah', 'sebelum', 'sambil', 'seraya', 'hingga', 'sampai', 'selama',
+            
+            # Query-specific noise terms
+            'apa', 'bagaimana', 'dimana', 'kapan', 'mengapa', 'siapa', 'berapa',
+            'berikan', 'jelaskan', 'sebutkan', 'cara', 'metode', 'langkah',
+            'tentang', 'mengenai', 'terkait', 'berhubungan', 'itu', 'benar',
             
             # Hadith transmission chain terms (sanad)
             'menceritakan', 'bercerita', 'mengabarkan', 'memberitahukan', 'mendengar',
@@ -172,7 +148,10 @@ class EnhancedIslamicKeywordExtractor:
             
             # Common verbs that don't add semantic value
             'berkata', 'mengatakan', 'bersabda', 'menjawab', 'bertanya',
-            'melihat', 'datang', 'pergi', 'kembali', 'pulang', 'keluar', 'masuk'
+            'melihat', 'datang', 'pergi', 'kembali', 'pulang', 'keluar', 'masuk',
+            
+            # Truncated/broken words that cause noise
+            'ang', 'berik', 'dekah', 'ramad', 'ras', 'deng', 'bakti'
         }
 
     def _get_comprehensive_noise_patterns(self) -> List[str]:
@@ -196,15 +175,17 @@ class EnhancedIslamicKeywordExtractor:
         ]
 
     def _get_islamic_categories(self) -> Dict[str, List[str]]:
-        """Get Islamic concept categories for semantic grouping."""
+        """Get Islamic concept categories for semantic grouping using Indonesian terms."""
         return {
-            'worship': ['shalat', 'puasa', 'zakat', 'haji', 'umrah', 'doa', 'dzikir'],
-            'purification': ['wudhu', 'tayammum', 'ghusl', 'bersuci', 'najis', 'suci'],
-            'ethics': ['akhlak', 'adab', 'sabar', 'syukur', 'ikhlas', 'amanah', 'jujur'],
-            'legal': ['halal', 'haram', 'wajib', 'sunnah', 'makruh', 'mubah', 'hudud'],
-            'belief': ['iman', 'islam', 'tauhid', 'syirik', 'kufur', 'taqwa'],
-            'social': ['nikah', 'jual_beli', 'sedekah', 'silaturahmi', 'jihad'],
-            'eschatology': ['akhirat', 'surga', 'neraka', 'kiamat', 'mahsyar']
+            'ibadah': ['shalat', 'puasa', 'zakat', 'haji', 'umrah', 'doa', 'dzikir'],
+            'bersuci': ['wudhu', 'tayammum', 'ghusl', 'bersuci', 'najis', 'suci', 'thaharah'],
+            'akhlak': ['akhlak', 'adab', 'sabar', 'syukur', 'ikhlas', 'amanah', 'jujur'],
+            'hukum': ['halal', 'haram', 'wajib', 'sunnah', 'makruh', 'mubah', 'hudud'],
+            'aqidah': ['iman', 'islam', 'tauhid', 'syirik', 'kufur', 'taqwa'],
+            'muamalah': ['nikah', 'jual_beli', 'sedekah', 'silaturahmi', 'jihad', 'riba'],
+            'akhirat': ['akhirat', 'surga', 'neraka', 'kiamat', 'mahsyar', 'syahid'],
+            'ramadan': ['puasa', 'ramadan', 'sahur', 'iftar', 'berbuka', 'tarawih'],
+            'minuman': ['khamr', 'arak', 'minuman keras', 'memabukkan', 'mabuk']
         }
 
     def normalize_text(self, text: str) -> str:
@@ -385,15 +366,27 @@ class EnhancedIslamicKeywordExtractor:
 
 # Configuration constants
 CSV_DIR = Path("data/csv")
+JSON_DIR = Path("data/processed/hadits_docs.json")
 OUTPUT_PATH = Path("data/processed/enhanced_keywords_map.json")
 TERJEMAH_FIELD = "terjemah"
-MIN_FREQUENCY = 15
+MIN_FREQUENCY = 40
 MAX_NGRAM = 3
 
 def generate_meaningful_ngrams(text: str, max_n: int = MAX_NGRAM) -> list:
     """Legacy function - use EnhancedIslamicKeywordExtractor instead."""
     extractor = EnhancedIslamicKeywordExtractor(max_ngram=max_n)
     return extractor.generate_enhanced_ngrams(text)
+
+def load_json_texts(json_path: Path = Path("data/processed/hadits_docs.json")) -> List[str]:
+      """Load all terjemah texts from processed JSON file."""
+      logger.info(f"Loading texts from {json_path}")
+
+      with open(json_path, 'r', encoding='utf-8') as f:
+          hadits_data = json.load(f)
+
+      texts = [hadis['terjemah'] for hadis in hadits_data if hadis.get('terjemah')]
+      logger.info(f"Loaded {len(texts)} hadis texts")
+      return texts
 
 def load_csv_texts(csv_dir: Path) -> List[str]:
     """Load all terjemah texts from CSV files."""
@@ -476,7 +469,8 @@ def main():
         )
         
         # Load all CSV texts
-        texts = load_csv_texts(CSV_DIR)
+        # texts = load_csv_texts(CSV_DIR)
+        texts = load_json_texts(JSON_DIR)
         
         if not texts:
             logger.error("No texts found. Please check the CSV files.")

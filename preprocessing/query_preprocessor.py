@@ -23,14 +23,19 @@ class QueryPreprocessor:
     """
     
     def __init__(self):
-        # Indonesian stopwords
+        # Enhanced Indonesian stopwords with query-specific terms
         self.indonesian_stopwords = {
             'yang', 'dan', 'di', 'ke', 'dari', 'pada', 'dengan', 'untuk', 'adalah', 'akan',
             'telah', 'sudah', 'atau', 'juga', 'tidak', 'bila', 'jika', 'ketika', 'saat',
             'itu', 'ini', 'mereka', 'kita', 'kami', 'dia', 'ia', 'saya', 'anda', 'engkau',
             'kamu', 'kalian', 'beliau', 'ada', 'seperti', 'antara', 'semua', 'setiap',
             'bagi', 'oleh', 'karena', 'sebab', 'supaya', 'agar', 'hingga', 'sampai',
-            'maka', 'lalu', 'kemudian', 'setelah', 'sebelum', 'selama', 'sambil'
+            'maka', 'lalu', 'kemudian', 'setelah', 'sebelum', 'selama', 'sambil',
+            
+            # Query-specific stopwords
+            'apa', 'bagaimana', 'dimana', 'kapan', 'mengapa', 'siapa', 'berapa',
+            'apa itu', 'berikan', 'jelaskan', 'sebutkan', 'tentang', 'mengenai',
+            'terkait', 'berhubungan', 'cara', 'metode', 'langkah'
         }
         
         # Arabic transliteration stopwords
@@ -55,11 +60,11 @@ class QueryPreprocessor:
             self.hadith_stopwords
         )
         
-        # Light lemmatization rules for Indonesian
+        # Enhanced lemmatization rules for Indonesian Islamic terms
         self.lemmatization_rules = {
-            # Common prefix removal patterns
+            # Worship practices - improved mapping
             'berwudhu': 'wudhu',
-            'berwudu': 'wudu',
+            'berwudu': 'wudhu', 
             'bertayammum': 'tayammum',
             'bershalat': 'shalat',
             'menshalatkan': 'shalat',
@@ -67,10 +72,17 @@ class QueryPreprocessor:
             'menyalatkan': 'shalat',
             'berpuasa': 'puasa',
             'berzakat': 'zakat',
-            'mengeluarkan': 'keluar',
-            'mengerjakan': 'kerja',
-            'melaksanakan': 'laksana',
-            'melakukan': 'laku',
+            
+            # Action words that should retain meaning
+            'berikan': 'berikan',  # Keep this for query intent
+            'jelaskan': 'jelaskan',  # Keep this for query intent  
+            'sebutkan': 'sebutkan',  # Keep this for query intent
+            'mengeluarkan': 'keluarkan',  # Better than 'keluar'
+            'mengerjakan': 'kerjakan',    # Better than 'kerja'
+            'melaksanakan': 'laksanakan', # Better than 'laksana'
+            'melakukan': 'lakukan',       # Better than 'laku'
+            
+            # Permissibility terms
             'mengharamkan': 'haram',
             'menghalalkan': 'halal',
             'memperbolehkan': 'boleh',
@@ -83,7 +95,7 @@ class QueryPreprocessor:
             'diwajibkan': 'wajib',
             'diperintahkan': 'perintah',
             
-            # Islamic terms standardization
+            # Possessive forms
             'shalatnya': 'shalat',
             'shalatmu': 'shalat',
             'shalatku': 'shalat',
@@ -97,14 +109,33 @@ class QueryPreprocessor:
             'wudhumu': 'wudhu',
             'wudhuku': 'wudhu',
             
-            # Common variations
+            # Spelling variations
             'salat': 'shalat',
             'sholat': 'shalat',
             'solat': 'shalat',
             'wudu': 'wudhu',
             'shaum': 'puasa',
             'shiyam': 'puasa',
-            'shalom': 'puasa',
+            'shadaqah': 'sedekah',
+            'sodaqoh': 'sedekah',
+            'shodaqoh': 'sedekah',
+            'dzuhur': 'dhuhur',
+            'zhuhur': 'dhuhur',
+            'dluhur': 'dhuhur',
+            'ashar': 'asar',
+            'maghrib': 'magrib',
+            'ramadhan': 'ramadan',
+            'ramadlan': 'ramadan',
+            
+            # Time-specific terms
+            'minuman': 'minum',  # Keep root for better matching
+            'keras': 'keras',    # Important modifier
+            'perang': 'perang',  # Keep full word
+            'jihad': 'jihad',    # Keep full word
+            'syahid': 'syahid',  # Keep full word
+            'berbakti': 'bakti', # Keep root
+            'orang': 'orang',    # Keep full word
+            'tua': 'tua'         # Keep full word
         }
     
     def normalize_text(self, text: str) -> str:
@@ -170,35 +201,53 @@ class QueryPreprocessor:
         return ' '.join(lemmatized_words)
     
     def _apply_suffix_rules(self, word: str) -> str:
-        """Apply suffix removal rules."""
-        # Remove possessive suffixes
-        if word.endswith(('nya', 'mu', 'ku')):
-            if len(word) > 4:  # Keep minimum word length
-                if word.endswith('nya'):
-                    return word[:-3]
-                elif word.endswith(('mu', 'ku')):
-                    return word[:-2]
+        """Apply conservative suffix removal rules for queries."""
+        # Be more conservative with suffix removal for queries
         
-        # Remove plural suffix -an if it makes sense
-        if word.endswith('an') and len(word) > 4:
+        # Only remove possessive suffixes for very long words
+        if word.endswith(('nya', 'mu', 'ku')) and len(word) > 6:
+            if word.endswith('nya'):
+                return word[:-3]
+            elif word.endswith(('mu', 'ku')):
+                return word[:-2]
+        
+        # More conservative with -an suffix removal
+        if word.endswith('an') and len(word) > 6:
             base = word[:-2]
-            # Check if base word is meaningful (simple heuristic)
-            if len(base) >= 3:
+            # Only remove if it results in a known Islamic term or common word
+            common_roots = {
+                'minum', 'makan', 'shalat', 'puasa', 'zakat', 'nikah',
+                'daging', 'hewan', 'makanan', 'pernik', 'buat', 'laku'
+            }
+            if base in common_roots:
                 return base
         
         return word
     
     def _apply_prefix_rules(self, word: str) -> str:
-        """Apply prefix removal rules."""
-        # Remove common prefixes
-        prefixes = ['ber', 'ter', 'per', 'men', 'mem', 'pen', 'pem', 'se', 'ke']
+        """Apply conservative prefix removal rules for queries."""
+        # Be very conservative with prefix removal in queries
+        # Only remove prefixes if the result is a known meaningful word
         
-        for prefix in prefixes:
-            if word.startswith(prefix) and len(word) > len(prefix) + 2:
-                base = word[len(prefix):]
-                # Simple check to ensure the result makes sense
-                if len(base) >= 3:
-                    return base
+        # Skip prefix removal for important query words
+        keep_intact = {
+            'berikan', 'jelaskan', 'sebutkan', 'bagaimana', 'dimana',
+            'mengapa', 'perang', 'sedekah', 'ramadan', 'minuman'
+        }
+        
+        if word.lower() in keep_intact:
+            return word
+            
+        # Very conservative prefix removal
+        conservative_prefixes = {
+            'ber': {'berwudhu': 'wudhu', 'berpuasa': 'puasa', 'berzakat': 'zakat'},
+            'men': {'mengharamkan': 'haram', 'menghalalkan': 'halal'},
+            'mem': {'memperbolehkan': 'boleh'}
+        }
+        
+        for prefix, mappings in conservative_prefixes.items():
+            if word in mappings:
+                return mappings[word]
         
         return word
     

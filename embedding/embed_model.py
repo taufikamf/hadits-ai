@@ -74,7 +74,7 @@ def generate_enhanced_keywords():
     with open(KEYWORDS_PATH, 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     
-    print(f"[✓] Enhanced keywords saved to {KEYWORDS_PATH}")
+    print(f"[OK] Enhanced keywords saved to {KEYWORDS_PATH}")
 
 def build_semantic_tags(doc, keyword_map):
     """Build semantic tags using enhanced keyword matching"""
@@ -94,7 +94,7 @@ def prepare_corpus(docs, keyword_map):
     corpus = []
 
     for i, doc in enumerate(docs[:10]):
-        print(f"[DEBUG] 📄 Doc {i+1} tags: {build_semantic_tags(doc, keyword_map)}")
+        print(f"[DEBUG] Doc {i+1} tags: {build_semantic_tags(doc, keyword_map)}")
 
     for i, doc in enumerate(docs):
         if "id" not in doc:
@@ -106,7 +106,7 @@ def prepare_corpus(docs, keyword_map):
         if tags:
             full = f"passage: {base}. Kata kunci penting: {tags}"
             if len(tags) <= 1:
-                print(f"[⚠️] Doc {doc['id']} hanya memiliki 1 tag: {tags}")
+                print(f"[WARNING] Doc {doc['id']} hanya memiliki 1 tag: {tags}")
         else:
             full = f"passage: {base}"
 
@@ -129,7 +129,7 @@ def save_output(embeddings, documents):
             "embeddings": embeddings,
             "documents": documents
         }, f)
-    print(f"[✓] Embeddings berhasil disimpan ke {OUTPUT_PATH}")
+    print(f"[OK] Embeddings berhasil disimpan ke {OUTPUT_PATH}")
 
 # ------------------------------
 # Main: jalankan semua
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     print("[~] Menyusun corpus semantik...")
     corpus = prepare_corpus(docs, keyword_map)
 
-    print("\n[📄] Contoh Corpus:")
+    print("\n[SAMPLE] Contoh Corpus:")
     for i in range(min(3, len(corpus))):
         print(f"[{i+1}] {corpus[i]}")
 

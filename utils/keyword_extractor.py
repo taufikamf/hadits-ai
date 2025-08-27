@@ -43,7 +43,7 @@ class HybridKeywordExtractor:
     """
     
     def __init__(self, 
-                 min_frequency: int = 20,
+                 min_frequency: int = 40,
                  max_ngram: int = 3,
                  islamic_terms_path: str = None):
         self.min_frequency = min_frequency

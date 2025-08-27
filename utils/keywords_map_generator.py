@@ -193,7 +193,7 @@ class KeywordsMapGenerator:
         text = re.sub(r'radhiyallahu\\s+(anhu|anha|anhum)', 'ra', text)
         
         # Remove punctuation but preserve apostrophes and hyphens in words
-        text = re.sub(r'[^\\w\\s\\'-]', ' ', text)
+        text = re.sub(r'[^\w\s\'-]', ' ', text)
         text = re.sub(r'\\s+', ' ', text)
         
         return text.strip()

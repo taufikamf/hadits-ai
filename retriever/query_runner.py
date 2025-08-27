@@ -293,7 +293,7 @@ def query_hadits_return(
     optimized_query: str = None, 
     top_k: int = 5, 
     required_keywords: List[str] = [], 
-    min_match: int = 2,
+    min_match: int = None,  # Auto-determine based on keywords
     apply_literal_boost: bool = True,
     boost_factor: float = 0.2
 ) -> List[Dict]:
@@ -305,7 +305,7 @@ def query_hadits_return(
         optimized_query (str, optional): Query yang sudah dioptimasi. Defaults to None.
         top_k (int): Jumlah hasil yang diinginkan. Defaults to 5.
         required_keywords (List[str]): Keywords yang harus ada di hasil. Defaults to [].
-        min_match (int): Minimum jumlah keywords yang harus match. Defaults to 2.
+        min_match (int): Minimum jumlah keywords yang harus match. Defaults to None (auto-determined).
         apply_literal_boost (bool): Whether to apply literal overlap boosting. Defaults to True.
         boost_factor (float): Boost factor for literal overlap. Defaults to 0.2.
         
@@ -325,9 +325,21 @@ def query_hadits_return(
             else:
                 optimized_query = f"passage: {raw_query}"
         
+        # Auto-determine min_match if not specified
+        if min_match is None:
+            if len(required_keywords) == 0:
+                min_match = 0  # No filtering if no keywords
+            elif len(required_keywords) == 1:
+                min_match = 1  # Must match the only keyword
+            elif len(required_keywords) <= 3:
+                min_match = 1  # At least 1 for small keyword sets
+            else:
+                min_match = max(1, len(required_keywords) // 2)  # At least half for larger sets
+        
         logger.info(f"Processing query: '{raw_query}'")
         logger.info(f"Optimized query: '{optimized_query}'")
         logger.info(f"Required keywords: {required_keywords}")
+        logger.info(f"Min match (auto-determined): {min_match}")
         
         # Step 2: Generate embedding and search FAISS
         embedding = get_query_embedding(optimized_query)

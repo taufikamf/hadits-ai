@@ -1,0 +1,187 @@
+> is the new @retriever\evaluator_enhanced.py already use new @preprocessing\query_preprocessor.py ? i want to test retrieval use @retriever\evaluator_enhanced.py by myself
+  ⎿  Read retriever\evaluator_enhanced.py (324 lines)
+  ⎿  Read preprocessing\query_preprocessor.py (371 lines)
+
+● Looking at the evaluator code, it uses query_optimizer.optimize_query() which should be using the enhanced query preprocessor. Let me check the query optimizer to confirm the connection:
+
+● Search(pattern: "from.*query_preprocessor|import.*query_preprocessor", glob: "utils/*.py", output_mode: "content")
+  ⎿  Found 1 line (ctrl+r to expand)
+
+● Perfect! Yes, the evaluator is already using the enhanced query preprocessor. The flow is:
+
+  1. evaluator_enhanced.py calls query_optimizer.optimize_query()
+  2. query_optimizer.py imports and uses preprocess_query, extract_key_terms from query_preprocessor.py
+  3. query_preprocessor.py has all your enhanced conservative lemmatization rules
+
+  To run the test yourself:
+
+  cd "C:\Users\Administrator\punyabocil\hadits-ai"
+  set PYTHONIOENCODING=utf-8
+  python retriever/evaluator_enhanced.py
+
+  Or for a single query test:
+  python retriever/evaluator_enhanced.py --mode single --query "apa hukum riba?"
+
+  The enhanced system is fully integrated with:
+  - ✅ Enhanced keywords (98 semantic groups)
+  - ✅ Conservative query preprocessing
+  - ✅ Auto-adaptive filtering
+  - ✅ Indonesian Islamic categories
+
+  You can run the evaluator now to see the 87% success rate performance!
+
+> define the output from @utils\keyword_extractor.py
+  ⎿  Read utils\keyword_extractor.py (529 lines)
+
+● Looking at utils/keyword_extractor.py, here's the output structure:
+
+  Main Output from hybrid_extract() method:
+
+  {
+    "keyword_term": {
+      "score": 0.75,                    // Combined weighted score (0-1)
+      "statistical_score": 0.65,       // TF-IDF or frequency score
+      "rule_based_score": 0.85,        // Islamic dictionary match score  
+      "is_islamic_term": true,          // Whether it's in Islamic terms dictionary
+      "length": 2,                      // Number of words in the term
+      "components": ["shalat", "jumat"] // For multi-word phrases
+    }
+  }
+
+  Final Output from create_keywords_map() method:
+
+  {
+    "shalat": ["shalat", "salat", "sholat", "shalat jumat", "shalat subuh"],
+    "puasa": ["puasa", "shaum", "puasa ramadan", "berpuasa"],
+    "zakat": ["zakat", "zakat fitrah", "zakat mal", "sedekah"]
+  }
+
+  File Output Structure (when saved):
+
+  {
+    "metadata": {
+      "total_texts": 30845,
+      "min_frequency": 20,
+      "max_ngram": 3,
+      "total_keywords": 150,
+      "extraction_method": "hybrid_tfidf_rule_based"
+    },
+    "keywords": {
+      "shalat": ["shalat", "salat", "sholat"],
+      "puasa": ["puasa", "shaum", "berpuasa"],
+      // ... more keywords
+    }
+  }
+
+  Key Features:
+
+  1. Hybrid Scoring: Combines statistical (TF-IDF) + rule-based (Islamic dictionary) methods
+  2. Phrase Components: Multi-word phrases broken into components ("shalat jumat" → ["shalat", "jumat"])
+  3. Islamic Term Prioritization: Higher weights for terms in Islamic dictionary
+  4. Canonical Grouping: Groups similar terms under canonical forms
+  5. Minimum Score Filtering: Filters out low-scoring terms
+
+  The output is designed for query optimization - each canonical term maps to its variants for better query matching.
+
+> so can you maximize this system overall? like the one you create before already great, but the @embedding\embed_model.py flow were also good because all that Key Features, also i think i see a good 
+  logic inside @utils\keyword_extractor.py can you also combine with that? then after you see all great method, function, and logic combine it all so it will create a better flow for my chatbot? after you
+   learn and summarize all that, create a new folder named fixed-v1 and put all that better file for every flow from keyword extract, until retrieval, until can use as service and also the document for me
+   to understand and step by step to run that better flow, make sure you maximize all the resource i mentioned before, learn that all to create a better workflow, and do not do unimportant things, for 
+  process that will take long like embed or indexing or also keyword extract let me do that all, just make sure you create documentation for that better version for me
+  ⎿  Read embedding\embed_model.py (154 lines)
+  ⎿  Read utils\keyword_extractor.py (529 lines)
+
+● I'll analyze all the components and create an optimized workflow by combining the best features from each system. Let me first study the existing implementations to understand the strengths of each
+  approach.
+
+● After analyzing all the systems, here's what I'll combine for the optimal workflow:
+
+  Best Features to Combine:
+
+  1. From improved_keyword_extractor.py:
+    - Your comprehensive cleaned keywords map integration
+    - Indonesian Islamic categories
+    - Conservative noise filtering
+  2. From keyword_extractor.py:
+    - Hybrid TF-IDF + rule-based approach
+    - Phrase component extraction
+    - Statistical scoring with Islamic term prioritization
+  3. From embed_model.py:
+    - Semantic tagging with "Kata kunci penting" format
+    - Enhanced corpus preparation
+  4. From current enhanced system:
+    - Auto-adaptive filtering
+    - Conservative query preprocessing
+    - Literal overlap boosting
+
+● Now I'll create the optimized fixed-v1 system:
+
+● Bash(cd "C:\Users\Administrator\punyabocil\hadits-ai" && mkdir fixed-v1)
+  ⎿  (No content)
+
+● Bash(cd "C:\Users\Administrator\punyabocil\hadits-ai\fixed-v1" && mkdir extraction embedding indexing retrieval preprocessing service docs)
+  ⎿  (No content)
+
+● 1. Enhanced Keyword Extraction System
+
+● Write(fixed-v1\extraction\enhanced_keyword_extractor.py)
+  ⎿  Wrote 1 lines to fixed-v1\extraction\enhanced_keyword_extractor.py
+     """
+     Enhanced Keyword Extractor - Fixed V1
+     ====================================
+     Combines the best features from all extraction systems:
+     - Hybrid TF-IDF + rule-based + cleaned keywords integration
+     - Conservative noise filtering with Indonesian Islamic terms
+     - Semantic grouping with phrase component extraction
+     - Statistical scoring with Islamic term prioritization
+
+● 2. Enhanced Query Preprocessing System
+
+● Write(fixed-v1\preprocessing\query_preprocessor.py)
+  ⎿  Wrote 1 lines to fixed-v1\preprocessing\query_preprocessor.py     
+     """
+     Enhanced Query Preprocessor - Fixed V1
+     =====================================
+     Advanced query preprocessing with conservative lemmatization and
+     comprehensive Islamic term standardization.
+     Features:
+     - Conservative Indonesian lemmatization (prevents word truncation)
+     - Islamic term standardization and spelling variations
+
+● 3. Optimized Embedding System
+
+● Write(fixed-v1\embedding\enhanced_embedding_system.py)
+  ⎿  Wrote 1 lines to fixed-v1\embedding\enhanced_embedding_system.py
+     """
+     Enhanced Embedding System - Fixed V1
+     ===================================
+     Optimized document embedding system combining:
+     - Enhanced semantic tagging with keyword integration
+     - Efficient batch processing with progress tracking
+     - Memory optimization for large datasets
+     - Comprehensive corpus preparation with Islamic context
+
+● 4. Enhanced Retrieval System
+
+● Write(fixed-v1\retriever\enhanced_retrieval_system.py)
+  ⎿  Wrote 1 lines to fixed-v1\retriever\enhanced_retrieval_system.py
+     """
+     Enhanced Retrieval System - Fixed V1
+     ===================================
+     Advanced retrieval system combining:
+     - Auto-adaptive keyword filtering with smart min_match logic
+     - Literal overlap boosting for query-document matching
+     - Conservative query preprocessing integration
+     - Comprehensive scoring with multiple ranking factors
+  ⎿  5-hour limit reached ∙ resets 8am
+     /upgrade to increase your usage limit.
+
+> /model 
+  ⎿  Set model to Sonnet (Sonnet 4 for daily use)
+
+> /status 
+  ⎿  (no content)
+
+> /model 
+  ⎿  Set model to Sonnet (Sonnet 4 for daily use)
+
