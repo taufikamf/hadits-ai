@@ -29,7 +29,7 @@ class EnhancedQueryPreprocessor:
     Combines conservative lemmatization with comprehensive Islamic term mapping.
     """
     
-    def __init__(self, keywords_map_path: str = "../data/enhanced_index_v1/enhanced_keywords_map_v1.json"):
+    def __init__(self, keywords_map_path: str = "../../data/enhanced_index_v1/enhanced_keywords_map_v1.json"):
         """
         Initialize the enhanced query preprocessor.
         

@@ -40,8 +40,8 @@ logger = logging.getLogger(__name__)
 class RetrievalConfig:
     """Configuration for enhanced retrieval system."""
     # Embedding and data paths
-    embeddings_path: str = "../data/enhanced_index_v1/enhanced_embeddings_v1.pkl"
-    keywords_map_path: str = "../data/enhanced_index_v1/enhanced_keywords_map_v1.json"
+    embeddings_path: str = "../../data/enhanced_index_v1/enhanced_embeddings_v1.pkl"
+    keywords_map_path: str = "../../data/enhanced_index_v1/enhanced_keywords_map_v1.json"
     
     # Retrieval parameters
     top_k: int = 50
