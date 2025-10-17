@@ -808,6 +808,140 @@ class HadithAIService:
             "last_activity": session.last_activity.isoformat()
         }
     
+    def get_all_sessions(self) -> List[Dict[str, Any]]:
+        """
+        Get all chat sessions for frontend compatibility.
+        
+        Returns:
+            List[Dict[str, Any]]: List of session summaries
+        """
+        sessions = []
+        for session_id, session in self.sessions.items():
+            sessions.append({
+                "session_id": session_id,
+                "title": f"Chat Session {session_id[:8]}",
+                "created_at": session.created_at.isoformat(),
+                "updated_at": session.last_activity.isoformat(),
+                "message_count": session.query_count * 2  # Approximate user + assistant messages
+            })
+        
+        # Sort by updated_at descending
+        sessions.sort(key=lambda x: x['updated_at'], reverse=True)
+        return sessions
+    
+    def get_session_info(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get basic session information.
+        
+        Args:
+            session_id (str): Session ID
+            
+        Returns:
+            Optional[Dict[str, Any]]: Session info or None if not found
+        """
+        session = self.sessions.get(session_id)
+        if not session:
+            return None
+            
+        return {
+            "session_id": session_id,
+            "title": f"Chat Session {session_id[:8]}",
+            "created_at": session.created_at.isoformat(),
+            "updated_at": session.last_activity.isoformat()
+        }
+    
+    def get_session_details(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get detailed session information with messages for frontend compatibility.
+        
+        Args:
+            session_id (str): Session ID
+            
+        Returns:
+            Optional[Dict[str, Any]]: Session details or None if not found
+        """
+        session = self.sessions.get(session_id)
+        if not session:
+            return None
+        
+        # Reconstruct messages from context history
+        messages = []
+        message_id = 1
+        
+        for i, context in enumerate(session.context_history):
+            # Add user message
+            messages.append({
+                "id": str(message_id),
+                "role": "user",
+                "content": context.get("query", ""),
+                "timestamp": session.created_at.isoformat()
+            })
+            message_id += 1
+            
+            # Add assistant message (if available in context)
+            if "response" in context:
+                messages.append({
+                    "id": str(message_id),
+                    "role": "assistant", 
+                    "content": context["response"],
+                    "timestamp": session.created_at.isoformat()
+                })
+                message_id += 1
+        
+        return {
+            "session_id": session_id,
+            "title": f"Chat Session {session_id[:8]}",
+            "created_at": session.created_at.isoformat(),
+            "updated_at": session.last_activity.isoformat(),
+            "messages": messages
+        }
+    
+    def update_session_title(self, session_id: str, title: str) -> bool:
+        """
+        Update session title (placeholder for frontend compatibility).
+        
+        Args:
+            session_id (str): Session ID
+            title (str): New title
+            
+        Returns:
+            bool: True if successful, False if session not found
+        """
+        session = self.sessions.get(session_id)
+        if not session:
+            return False
+            
+        # For now, we don't store titles separately, but we acknowledge the update
+        session.last_activity = datetime.now()
+        return True
+    
+    def delete_session(self, session_id: str) -> bool:
+        """
+        Delete a chat session.
+        
+        Args:
+            session_id (str): Session ID
+            
+        Returns:
+            bool: True if successful, False if session not found
+        """
+        if session_id in self.sessions:
+            del self.sessions[session_id]
+            return True
+        return False
+    
+    def session_exists(self, session_id: str) -> bool:
+        """
+        Check if a session exists.
+        
+        Args:
+            session_id (str): Session ID
+            
+        Returns:
+            bool: True if session exists
+        """
+        return session_id in self.sessions
+
     def get_service_health(self) -> Dict[str, Any]:
         """
         Get service health and status information.

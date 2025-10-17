@@ -23,7 +23,7 @@ import logging
 import asyncio
 from datetime import datetime
 from typing import Dict, Any, Optional, AsyncGenerator
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, make_response
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, InternalServerError
 
@@ -135,8 +135,12 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
     app = Flask(__name__)
     app.secret_key = 'hadith_ai_secret_key_v1'  # Change in production
     
-    # Enable CORS for cross-origin requests
-    CORS(app, supports_credentials=True)
+    # Enable CORS for cross-origin requests - permissive for frontend
+    CORS(app, 
+         supports_credentials=True,
+         origins=["*"],  # Allow all origins for development
+         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
     
     # Initialize service
     global hadith_service
@@ -149,6 +153,16 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
         raise
     
     # API Routes
+    # Handle preflight requests
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            response = make_response()
+            response.headers.add("Access-Control-Allow-Origin", "*")
+            response.headers.add('Access-Control-Allow-Headers', "*")
+            response.headers.add('Access-Control-Allow-Methods', "*")
+            return response
+
     @app.route('/', methods=['GET'])
     def home():
         """Home endpoint with API information."""
@@ -161,7 +175,13 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
                 "endpoints": {
                     "GET /": "API information",
                     "GET /health": "Service health check",
-                    "POST /session/create": "Create new chat session",
+                    "GET /sessions": "Get all chat sessions",
+                    "POST /sessions": "Create new chat session",
+                    "GET /sessions/{id}": "Get specific session with messages",
+                    "PUT /sessions/{id}": "Update session title",
+                    "DELETE /sessions/{id}": "Delete session",
+                    "POST /sessions/{id}/ask": "Ask question in session (SSE streaming)",
+                    "POST /ask": "Ask question without session (SSE streaming)",
                     "POST /chat": "Process chat query (basic)",
                     "POST /chat/async": "Process chat query with enhanced LLM generation",
                     "POST /chat/stream": "Process chat query with streaming response",
@@ -181,7 +201,7 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
             message="Hadith AI API is running"
         )
 
-    @app.route('/health', methods=['GET'])
+    @app.route('/health', methods=['GET', 'OPTIONS'])
     def health_check():
         """Health check endpoint."""
         try:
@@ -209,7 +229,7 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
                 status_code=500
             )
 
-    @app.route('/session/create', methods=['POST'])
+    @app.route('/session/create', methods=['POST', 'OPTIONS'])
     def create_session():
         """Create a new chat session."""
         try:
@@ -232,7 +252,7 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
                 status_code=500
             )
 
-    @app.route('/chat', methods=['POST'])
+    @app.route('/chat', methods=['POST', 'OPTIONS'])
     def chat():
         """
         Process a chat query with session management.
@@ -414,7 +434,7 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
                 status_code=500
             )
 
-    @app.route('/chat/stream', methods=['POST'])
+    @app.route('/chat/stream', methods=['POST', 'OPTIONS'])
     def chat_stream():
         """
         Process a chat query with streaming response.
@@ -512,7 +532,7 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
                 status_code=500
             )
     
-    @app.route('/chat/async', methods=['POST'])
+    @app.route('/chat/async', methods=['POST', 'OPTIONS'])
     def chat_async():
         """
         Process a chat query asynchronously with enhanced LLM generation.
@@ -586,6 +606,323 @@ def create_app(service_config: ServiceConfig = None) -> Flask:
             
         except Exception as e:
             logger.error(f"Async chat processing failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Internal server error: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/sessions', methods=['GET', 'OPTIONS'])
+    def get_sessions():
+        """Get all chat sessions (compatible with main.py frontend)."""
+        try:
+            # Get all sessions from service (we'll need to implement this in service)
+            sessions = hadith_service.get_all_sessions()
+            
+            return format_api_response(
+                success=True,
+                data={
+                    "sessions": sessions,
+                    "total": len(sessions)
+                },
+                message="Sessions retrieved successfully"
+            )
+            
+        except Exception as e:
+            logger.error(f"Sessions retrieval failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Failed to retrieve sessions: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/sessions', methods=['POST', 'OPTIONS'])
+    def create_session_compatible():
+        """Create a new chat session (compatible with main.py frontend)."""
+        try:
+            data = request.get_json() if request.is_json else {}
+            title = data.get('title') if data else None
+            
+            session_id = hadith_service.create_session()
+            
+            # Get session details for compatibility
+            session_info = hadith_service.get_session_info(session_id)
+            
+            return format_api_response(
+                success=True,
+                data={
+                    "session_id": session_id,
+                    "title": session_info.get('title', f'Chat Session'),
+                    "created_at": session_info.get('created_at', datetime.now().isoformat())
+                },
+                message="Session created successfully"
+            )
+            
+        except Exception as e:
+            logger.error(f"Session creation failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Failed to create session: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/sessions/<session_id>', methods=['GET', 'OPTIONS'])
+    def get_session_details(session_id: str):
+        """Get a specific session with all messages (compatible with main.py frontend)."""
+        try:
+            session_details = hadith_service.get_session_details(session_id)
+            
+            if not session_details:
+                return format_api_response(
+                    success=False,
+                    error="Session not found",
+                    status_code=404
+                )
+            
+            return format_api_response(
+                success=True,
+                data=session_details,
+                message="Session details retrieved successfully"
+            )
+            
+        except Exception as e:
+            logger.error(f"Session details retrieval failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Failed to retrieve session details: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/sessions/<session_id>', methods=['PUT', 'OPTIONS'])
+    def update_session_title(session_id: str):
+        """Update session title (compatible with main.py frontend)."""
+        try:
+            if not request.is_json:
+                return format_api_response(
+                    success=False,
+                    error="Request must be JSON",
+                    status_code=400
+                )
+            
+            data = request.get_json()
+            title = data.get('title')
+            
+            if not title:
+                return format_api_response(
+                    success=False,
+                    error="Title is required",
+                    status_code=400
+                )
+            
+            success = hadith_service.update_session_title(session_id, title)
+            
+            if not success:
+                return format_api_response(
+                    success=False,
+                    error="Session not found",
+                    status_code=404
+                )
+            
+            return format_api_response(
+                success=True,
+                data={"message": "Session updated successfully"},
+                message="Session updated successfully"
+            )
+            
+        except Exception as e:
+            logger.error(f"Session update failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Failed to update session: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/sessions/<session_id>', methods=['DELETE', 'OPTIONS'])
+    def delete_session(session_id: str):
+        """Delete a chat session (compatible with main.py frontend)."""
+        try:
+            success = hadith_service.delete_session(session_id)
+            
+            if not success:
+                return format_api_response(
+                    success=False,
+                    error="Session not found",
+                    status_code=404
+                )
+            
+            return format_api_response(
+                success=True,
+                data={"message": "Session deleted successfully"},
+                message="Session deleted successfully"
+            )
+            
+        except Exception as e:
+            logger.error(f"Session deletion failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Failed to delete session: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/sessions/<session_id>/ask', methods=['POST', 'OPTIONS'])
+    def ask_question_in_session(session_id: str):
+        """Ask a question within a specific chat session (compatible with main.py frontend)."""
+        try:
+            if not request.is_json:
+                return format_api_response(
+                    success=False,
+                    error="Request must be JSON",
+                    status_code=400
+                )
+            
+            data = request.get_json()
+            question = data.get('question', '').strip()
+            
+            if not question:
+                return format_api_response(
+                    success=False,
+                    error="Question cannot be empty",
+                    status_code=400
+                )
+            
+            # Check if session exists
+            session_exists = hadith_service.session_exists(session_id)
+            if not session_exists:
+                return format_api_response(
+                    success=False,
+                    error="Session not found",
+                    status_code=404
+                )
+            
+            # For streaming response compatible with main.py
+            def generate_stream():
+                """Generate streaming response compatible with FastAPI SSE."""
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    
+                    try:
+                        async def async_stream():
+                            async for chunk in hadith_service.generate_streaming_response(
+                                question, session_id
+                            ):
+                                # Format for FastAPI SSE compatibility
+                                if isinstance(chunk, dict):
+                                    event_type = chunk.get('type', 'message')
+                                    data = chunk.get('data', '')
+                                else:
+                                    event_type = 'message'
+                                    data = str(chunk)
+                                
+                                yield f"event: {event_type}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+                            
+                            yield f"event: complete\ndata: {json.dumps('Response generation completed', ensure_ascii=False)}\n\n"
+                        
+                        async_gen = async_stream()
+                        
+                        while True:
+                            try:
+                                chunk = loop.run_until_complete(async_gen.__anext__())
+                                yield chunk
+                            except StopAsyncIteration:
+                                break
+                                
+                    finally:
+                        loop.close()
+                        
+                except Exception as e:
+                    logger.error(f"Streaming error: {e}")
+                    yield f"event: error\ndata: {json.dumps(f'Streaming error: {str(e)}', ensure_ascii=False)}\n\n"
+            
+            return Response(
+                generate_stream(),
+                mimetype='text/event-stream',
+                headers={
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                    'X-Accel-Buffering': 'no'
+                }
+            )
+            
+        except Exception as e:
+            logger.error(f"Session question processing failed: {e}")
+            return format_api_response(
+                success=False,
+                error=f"Internal server error: {str(e)}",
+                status_code=500
+            )
+
+    @app.route('/ask', methods=['POST', 'OPTIONS'])
+    def ask_question():
+        """Ask a question without session (compatible with main.py frontend)."""
+        try:
+            if not request.is_json:
+                return format_api_response(
+                    success=False,
+                    error="Request must be JSON",
+                    status_code=400
+                )
+            
+            data = request.get_json()
+            question = data.get('question', '').strip()
+            
+            if not question:
+                return format_api_response(
+                    success=False,
+                    error="Question cannot be empty",
+                    status_code=400
+                )
+            
+            # For streaming response compatible with main.py
+            def generate_stream():
+                """Generate streaming response compatible with FastAPI SSE."""
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    
+                    try:
+                        async def async_stream():
+                            async for chunk in hadith_service.generate_streaming_response(question):
+                                # Format for FastAPI SSE compatibility
+                                if isinstance(chunk, dict):
+                                    event_type = chunk.get('type', 'message')
+                                    data = chunk.get('data', '')
+                                else:
+                                    event_type = 'message'
+                                    data = str(chunk)
+                                
+                                yield f"event: {event_type}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+                            
+                            yield f"event: complete\ndata: {json.dumps('Response generation completed', ensure_ascii=False)}\n\n"
+                        
+                        async_gen = async_stream()
+                        
+                        while True:
+                            try:
+                                chunk = loop.run_until_complete(async_gen.__anext__())
+                                yield chunk
+                            except StopAsyncIteration:
+                                break
+                                
+                    finally:
+                        loop.close()
+                        
+                except Exception as e:
+                    logger.error(f"Streaming error: {e}")
+                    yield f"event: error\ndata: {json.dumps(f'Streaming error: {str(e)}', ensure_ascii=False)}\n\n"
+            
+            return Response(
+                generate_stream(),
+                mimetype='text/event-stream',
+                headers={
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                    'X-Accel-Buffering': 'no'
+                }
+            )
+            
+        except Exception as e:
+            logger.error(f"Question processing failed: {e}")
             return format_api_response(
                 success=False,
                 error=f"Internal server error: {str(e)}",

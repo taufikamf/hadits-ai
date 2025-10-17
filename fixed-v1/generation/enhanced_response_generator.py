@@ -75,7 +75,7 @@ class GenerationConfig:
     llm_provider: LLMProvider = LLMProvider.GEMINI
     gemini_api_key: Optional[str] = None
     openai_api_key: Optional[str] = None
-    gemini_model: str = "gemini-2.0-flash-exp"
+    gemini_model: str = "gemini-2.5-flash-exp"
     openai_model: str = "gpt-4o-mini"
     
     # Generation parameters
@@ -169,18 +169,51 @@ class EnhancedResponseGenerator:
     def _load_system_prompts(self) -> Dict[ResponseMode, str]:
         """Load system prompts for different response modes."""
         
-        base_rules = """
-Anda adalah asisten AI yang ahli dalam hadits Islam dengan pengetahuan mendalam tentang ajaran Nabi Muhammad shallallahu 'alaihi wa sallam.
+        base_rules = """You are a helpful assistant specializing in Islamic Hadith knowledge.
+Use the following context as your learned knowledge, inside <context></context> XML tags.
+<context>
+{context}
+</context>
 
-ATURAN PENTING:
-- Gunakan Bahasa Indonesia yang formal dan sopan
-- Awali dengan "Assalamu'alaikum" jika sesuai konteks
-- Selalu tampilkan SEMUA hadits yang tersedia dalam konteks
-- Format hadits dengan jelas dan terstruktur
-- Berikan ringkasan yang mudah dipahami
-- Akhiri dengan pertanyaan follow-up
-- JANGAN gunakan tabel markdown (gunakan format list)
-- Jika tidak yakin, minta klarifikasi
+When responding to the user: 
+- Always search for relevant Hadiths from the context first.
+- Begin your response with: "Berikut adalah hadits-hadits yang relevan dari pertanyaan yang Anda berikan:"
+- Present each hadith in a **clear, structured format** using numbered lists instead of tables.
+- For each hadith, include:
+  * **Kitab**: Source book name
+  * **ID**: Hadith identifier  
+  * **Arab**: Arabic text (abbreviated if very long)
+  * **Terjemah**: Indonesian translation
+- After showing the hadiths, provide a **summary** of the relevant content in a clear and concise way.
+- End your answer by asking the user a follow-up question, such as: 
+  - "Apakah Anda ingin penjelasan lebih lanjut tentang hadits ini?" 
+  - "Ingin mencari hadits dengan topik lain?"
+
+Rules:
+- Use formal and polite **Bahasa Indonesia** when responding. 
+- If you don't know the answer, just say that you don't know. 
+- If you're not sure, ask the user for clarification. 
+- IMPORTANT: You MUST show ALL available hadiths in the context, not just one. Include every hadith provided to you. 
+- If the question is too vague, ask the user to be more specific (e.g., "Topik apa yang Anda maksudkan?").
+- NEVER use markdown tables as they can cause formatting issues.
+
+Example response format:
+
+**Hadits 1:**
+- **Kitab**: Sunan Abu Daud
+- **ID**: 1
+- **Arab**: حَدَّثَنَا عَبْدُ اللَّهِ... (text abbreviated if too long)
+- **Terjemah**: Telah menceritakan kepada kami...
+
+**Hadits 2:**
+- **Kitab**: Shahih Bukhari  
+- **ID**: 123
+- **Arab**: حَدَّثَنَا مُحَمَّدٌ...
+- **Terjemah**: Telah menceritakan kepada kami...
+
+**Ringkasan**: Nabi shallallahu 'alaihi wasallam mengajarkan adab tertentu ketika buang hajat, seperti menjauh dari manusia dan tidak menghadap kiblat. 
+
+**Pertanyaan lanjut**: Apakah Anda ingin penjelasan lebih lanjut atau mencari hadits lainnya?
 """
         
         comprehensive_prompt = base_rules + """
@@ -247,13 +280,14 @@ Tetap tampilkan hadits dengan format yang jelas.
     
     def prepare_context_from_results(self, results: List[RetrievalResult]) -> str:
         """
-        Prepare context string from retrieval results with intelligent formatting.
+        Convert hadith retrieval results into context string with length limits.
+        Uses the exact same formatting as main.py for consistency.
         
         Args:
             results (List[RetrievalResult]): Retrieval results
             
         Returns:
-            str: Formatted context string
+            str: Formatted context string matching main.py format
         """
         if not results:
             return "Tidak ada hadits yang ditemukan untuk pertanyaan ini."
@@ -267,29 +301,28 @@ Tetap tampilkan hadits dengan format yang jelas.
                 
             doc = result.document
             
-            # Get and truncate Arabic text
+            # Truncate very long Arabic text to prevent formatting issues (same as main.py)
             arab_text = doc.get('arab', '')
-            if len(arab_text) > self.config.max_arabic_length:
-                arab_text = arab_text[:self.config.max_arabic_length] + "... (teks diperpendek)"
-            
-            # Get and truncate translation
+            if len(arab_text) > 300:  # Same as main.py - reduced to save space
+                arab_text = arab_text[:300] + "... (teks diperpendek)"
+                
+            # Truncate very long translation text (same as main.py)
             terjemah_text = doc.get('terjemah', '')
-            if len(terjemah_text) > self.config.max_translation_length:
-                terjemah_text = terjemah_text[:self.config.max_translation_length] + "... (teks diperpendek)"
+            if len(terjemah_text) > 800:  # Same as main.py - limit translation length
+                terjemah_text = terjemah_text[:800] + "... (teks diperpendek)"
             
-            # Format context entry
+            # Format context entry (same format as main.py)
             context_part = f"""
 Kitab: {doc.get('kitab', 'Unknown')}
 ID: {doc.get('id', 'Unknown')}
 Arab: {arab_text}
 Terjemah: {terjemah_text}
-Relevance Score: {result.score:.3f}
-Matched Keywords: {', '.join(result.matched_keywords) if result.matched_keywords else 'None'}
 ---"""
             
-            # Check context length limit
-            if total_length + len(context_part) > self.config.max_context_length:
-                logger.info(f"Context length limit reached, using {i} hadits")
+            # Check if adding this hadith would exceed the total length limit (same as main.py)
+            max_total_length = 8000  # Same as main.py - increased to show more hadiths
+            if total_length + len(context_part) > max_total_length:
+                logger.info(f"Context length limit reached, truncating to {len(context_parts)} hadiths")
                 break
             
             context_parts.append(context_part)
