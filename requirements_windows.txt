@@ -38,5 +38,5 @@ psutil>=5.9.0  # For system monitoring
 tqdm>=4.65.0   # Progress bars
 
 # Optional performance libraries
-# faiss-gpu  # Alternative vector search (CUDA)
+faiss-gpu>=1.7.4  # Alternative vector search (CUDA)
 # cupy-cuda11x  # CUDA arrays (if needed)

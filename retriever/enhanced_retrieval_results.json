@@ -1,0 +1,1645 @@
+{
+  "evaluation_metadata": {
+    "evaluation_date": "2025-08-27T05:43:51.782637",
+    "system_version": "enhanced_v1.0",
+    "total_queries_tested": 15,
+    "evaluation_type": "enhanced_batch_evaluation"
+  },
+  "summary_statistics": {
+    "total_queries": 15,
+    "successful_queries": 15,
+    "total_results": 58,
+    "average_processing_time": 0.48419780731201173,
+    "keyword_extraction_stats": {
+      "2_keywords": 7,
+      "3_keywords": 5,
+      "8_keywords": 1,
+      "7_keywords": 1,
+      "4_keywords": 1
+    },
+    "retrieval_performance": {
+      "avg_results_per_query": 3.8666666666666667,
+      "queries_with_results": 13,
+      "zero_result_queries": 2
+    },
+    "success_rate": 100.0
+  },
+  "detailed_results": [
+    {
+      "query_id": 1,
+      "original_query": "apa hukum riba?",
+      "optimized_query": "passage: apa hukum riba?. Kata kunci penting: hukum riba",
+      "required_keywords": [
+        "hukum",
+        "riba"
+      ],
+      "keywords_count": 2,
+      "results_count": 0,
+      "processing_time_seconds": 0.5152742862701416,
+      "quality_metrics": {
+        "overall_quality": 0,
+        "metrics": {}
+      },
+      "results": [],
+      "timestamp": "2025-08-27T05:43:45.032947"
+    },
+    {
+      "query_id": 2,
+      "original_query": "apa itu zakat fitrah?",
+      "optimized_query": "passage: apa itu zakat fitrah?. Kata kunci penting: fitrah zakat",
+      "required_keywords": [
+        "fitrah",
+        "zakat"
+      ],
+      "keywords_count": 2,
+      "results_count": 5,
+      "processing_time_seconds": 0.4899468421936035,
+      "quality_metrics": {
+        "overall_quality": 5.205973373689941,
+        "metrics": {
+          "avg_keyword_coverage": 0.5,
+          "avg_literal_overlap": 0.5,
+          "avg_semantic_score": 0.5023893494759765,
+          "source_diversity": 0.6
+        },
+        "quality_components": {
+          "keyword_coverage": 0.5,
+          "literal_overlap": 0.5,
+          "semantic_score": 0.5023893494759765,
+          "source_diversity": 0.6
+        }
+      },
+      "results": [
+        {
+          "kitab": "shahih_muslim",
+          "id": "shahih_muslim_1640",
+          "arab": "حدثنا يحيى بن يحيى قال قرات على مالك عن زيد بن اسلم عن عياض بن عبد الله بن سعد بن ابي سرح انه سمع ابا سعيد الخدري يقولا\r\nكنا نخرج زكاة الفطر صاعا من طعام او صاعا من شعير او صاعا من تمر او صاعا من اقط او صاعا من زبيب",
+          "terjemah": "Telah menceritakan kepada kami Yahya bin Yahya ia berkata, saya telah membacakan kepada Malik dari Zaid bin Aslam dari Iyadl bin Abdullah bin Sa'd bin Abu Sarh bahwa ia mendengar Abu Sa'id Al Khudri berkata; Kami membayar zakat fithri berupa satu sha' gandum atau kurma atau satu sha' keju atau anggur kering.",
+          "score": 0.9889602422714233,
+          "tags": "bahwa, membayar zakat, satu, zakat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "zakat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 1
+        },
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_1782",
+          "arab": "حدثنا نصر بن علي الجهضمي حدثنا شجاع بن الوليد حدثنا حارثة بن محمد عن عمرة عن عايشة قالت\r\nسمعت رسول الله صلى الله عليه وسلم يقول لا زكاة في مال حتى يحول عليه الحول",
+          "terjemah": "Telah menceritakan kepada kami Nashr bin Ali Al Jahdlami berkata, telah menceritakan kepada kami Syuja' bin Al Walid berkata, telah menceritakan kepada kami Haritsah bin Muhammad dari Amrah dari Aisyah ia berkata, Aku mendengar Rasulullah shallallahu 'alaihi wasallam bersabda: Tidak ada zakat harta hingga mencapai haul.",
+          "score": 0.9889850378036499,
+          "tags": "ada zakat, aku, rasulullah, tidak ada zakat, zakat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "zakat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 2
+        },
+        {
+          "kitab": "shahih_muslim",
+          "id": "shahih_muslim_1645",
+          "arab": "حدثنا يحيى بن يحيى اخبرنا ابو خيثمة عن موسى بن عقبة عن نافع عن ابن عمر\r\nان رسول الله صلى الله عليه وسلم امر بزكاة الفطر ان تودى قبل خروج الناس الى الصلاة",
+          "terjemah": "Telah menceritakan kepada kami Yahya bin Yahya telah mengabarkan kepada kami Abu Khaitsamah dari Musa bin Uqbah dari Nafi' dari Ibnu Umar bahwa Rasulullah shallallahu 'alaihi wasallam memerintahkan agar membayar zakat fithrah sebelum manusia berangkat menunaikan shalat Ied.",
+          "score": 0.9891065120697021,
+          "tags": "bahwa, membayar zakat, menunaikan shalat, rasulullah, shalat, shalat ied, umar, zakat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "zakat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 3
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_1414",
+          "arab": "حدثنا معاذ بن فضالة حدثنا ابو عمر حفص بن ميسرة عن زيد بن اسلم عن عياض بن عبد الله بن سعد عن ابي سعيد الخدري رضي الله عنه قال\r\nكنا نخرج في عهد رسول الله صلى الله عليه وسلم يوم الفطر صاعا من طعام وقال ابو سعيد وكان طعامنا الشعير والزبيب والاقط والتمر",
+          "terjemah": "Telah menceritakan kepada kami Mu'adz bin Fadhalah telah menceritakan kepada kami Abu 'Umar Hafsh bin Maisarah dari Zaid bin Aslam dari 'Iyadh bin 'Abdullah bin Sa'ad dari Abu Sa'id Al Khudriy radliallahu 'anhu berkata: Pada zaman Nabi shallallahu 'alaihi wasallam kami mengeluarkan (zakat fithri) pada hari Raya 'Iedul fithri satu sha' dari makanan. Dan berkata, Abu Sa'id: Dan saat itu makanan kami adalah gandum, kismis, biji-bijian atau kurma.",
+          "score": 0.990582799911499,
+          "tags": "hari, nabi, satu, umar, zakat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "zakat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 4
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_1409",
+          "arab": "حدثنا قبيصة بن عقبة حدثنا سفيان عن زيد بن اسلم عن عياض بن عبد الله عن ابي سعيد رضي الله عنه قال\r\nكنا نطعم الصدقة صاعا من شعير",
+          "terjemah": "Telah menceritakan kepada kami Qabishah bin 'Uqbah telah menceritakan kepada kami Sufyan dari Zaid bin Aslam dari 'Iyadh bin 'Abdullah dari Abu Sa'id radliallahu 'anhu berkata: Kami memberi makan (orang miskin) dari zakat dengan satu sha' dari gandum.",
+          "score": 0.994818365573883,
+          "tags": "orang, satu, zakat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "zakat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:45.523891"
+    },
+    {
+      "query_id": 3,
+      "original_query": "bagaimana cara shalat malam?",
+      "optimized_query": "passage: bagaimana cara shalat malam?. Kata kunci penting: malam shalat",
+      "required_keywords": [
+        "malam",
+        "shalat"
+      ],
+      "keywords_count": 2,
+      "results_count": 5,
+      "processing_time_seconds": 0.4688994884490967,
+      "quality_metrics": {
+        "overall_quality": 5.19337248678986,
+        "metrics": {
+          "avg_keyword_coverage": 0.5,
+          "avg_literal_overlap": 0.5,
+          "avg_semantic_score": 0.4973489947159441,
+          "source_diversity": 0.6
+        },
+        "quality_components": {
+          "keyword_coverage": 0.5,
+          "literal_overlap": 0.5,
+          "semantic_score": 0.4973489947159441,
+          "source_diversity": 0.6
+        }
+      },
+      "results": [
+        {
+          "kitab": "shahih_muslim",
+          "id": "shahih_muslim_1253",
+          "arab": "حدثنا ابو بكر بن ابي شيبة حدثنا عبد الاعلى بن عبد الاعلى عن معمر عن يحيى بن ابي كثير عن ابي نضرة عن ابي سعيد\r\nان النبي صلى الله عليه وسلم قال اوتروا قبل ان تصبحوا",
+          "terjemah": "Telah menceritakan kepada kami Abu Bakr bin Abu Syaibah telah menceritakan kepada kami Abdul A'la bin Abdul A'la dari Ma'mar dari Yahya bin Abu Katsir dari Abu Nadlrah dari Abu Sa'id bahwa Nabi shallallahu 'alaihi wasallam bersabda: Shalat witirlah kalian sebelum masuk waktu Shubuh.",
+          "score": 1.010194754600525,
+          "tags": "bahwa, nabi, shalat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 1
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_949",
+          "arab": "حدثنا مسدد قال حدثنا اسماعيل قال حدثنا خالد عن ابي قلابة عن انس بن مالك قال\r\nكان القنوت في المغرب والفجر",
+          "terjemah": "Telah menceritakan kepada kami Musaddad berkata, telah menceritakan kepada kami Isma'il berkata, telah menceritakan kepada kami Khalid dari Abu Qilabah dari Anas bin Malik berkata, Qunut itu dilakukan pada shalat Maghrib dan Shubuh.",
+          "score": 1.0105520248413087,
+          "tags": "pada shalat, shalat, shalat maghrib, shalat maghrib dan",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 2
+        },
+        {
+          "kitab": "sunan_abu_daud",
+          "id": "sunan_abu_daud_918",
+          "arab": "حدثنا محمد بن كثير اخبرنا سفيان عن ابي حازم عن سهل بن سعد قال\r\nكنا نقيل ونتغدى بعد الجمعة",
+          "terjemah": "Telah menceritakan kepada kami Muhammad bin Katsir telah mengabarkan kepada kami Sufyan dari Abu Hazim dari Sahl bin Sa'd dia berkata; Kami melaksanakan qailulah (tidur siang) dan makan siang setelah melaksanakan shalat Jum'at.",
+          "score": 1.0106146693229676,
+          "tags": "melaksanakan shalat, shalat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_abu_daud",
+          "id": "sunan_abu_daud_353",
+          "arab": "حدثنا عمرو بن علي عن صفوان بن عيسى عن يزيد بن ابي عبيد عن سلمة بن الاكوع قال\r\nكان النبي صلى الله عليه وسلم يصلي المغرب ساعة تغرب الشمس اذا غاب حاجبها",
+          "terjemah": "Telah menceritakan kepada kami Amru bin Ali dari Shafwan bin Isa dari Yazid bin Abu Ubaid dari Salamah bin Al Akwa' dia berkata; Nabi Shallallahu alaihi wasallam shalat Maghrib pada saat matahari tenggelam ketika penghalangnya telah menghilang.",
+          "score": 1.0108442068099976,
+          "tags": "isa, nabi, shalat, shalat maghrib, wasallam shalat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 4
+        },
+        {
+          "kitab": "shahih_muslim",
+          "id": "shahih_muslim_986",
+          "arab": "و حدثنا يحيى بن يحيى قال قرات على مالك عن اسحق بن عبد الله بن ابي طلحة عن انس بن مالك قال\r\nكنا نصلي العصر ثم يخرج الانسان الى بني عمرو بن عوف فيجدهم يصلون العصر",
+          "terjemah": "Dan telah menceritakan kepada kami Yahya bin Yahya katanya; Aku bacakan kepada Malik dari Ishaq bin Abdulah bin Abu Thalhah dari Anas bin Malik, katanya; kami shalat Ashar, kemudian seseorang pergi ke Bani 'Amru bin 'Auf dan ia mendapati mereka masih melakukan shalat Ashar.",
+          "score": 1.011097288131714,
+          "tags": "aku, kami shalat, melakukan shalat, shalat, shalat ashar",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:45.992790"
+    },
+    {
+      "query_id": 4,
+      "original_query": "apa hukum minuman keras?",
+      "optimized_query": "passage: apa hukum minuman keras?. Kata kunci penting: hukum keras minum",
+      "required_keywords": [
+        "hukum",
+        "keras",
+        "minum"
+      ],
+      "keywords_count": 3,
+      "results_count": 4,
+      "processing_time_seconds": 0.4252490997314453,
+      "quality_metrics": {
+        "overall_quality": 3.907592203444162,
+        "metrics": {
+          "avg_keyword_coverage": 0.3333333333333333,
+          "avg_literal_overlap": 0.25,
+          "avg_semantic_score": 0.5130368813776649,
+          "source_diversity": 0.5
+        },
+        "quality_components": {
+          "keyword_coverage": 0.3333333333333333,
+          "literal_overlap": 0.25,
+          "semantic_score": 0.5130368813776649,
+          "source_diversity": 0.5
+        }
+      },
+      "results": [
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_5646",
+          "arab": "اخبرنا سويد قال انبانا عبد الله قال سمعت سفيان\r\nسيل عن النبيذ قال انتبذ عشيا واشربه غدوة",
+          "terjemah": "Telah mengabarkan kepada kami Suwaid ia berkata; telah memberitakan kepada kami Abdullah ia berkata, Aku mendengar Sufyan ditanya tentang perasan nabidz, ia lalu menjawab, Buatlah di malam hari lalu minumlah di pagi hari.",
+          "score": 0.8964619636535645,
+          "tags": "aku, hari",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "minum"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.0,
+          "boost_applied": 0.0,
+          "rank": 1
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_5480",
+          "arab": "اخبرنا سويد بن نصر قال اخبرنا عبد الله عن شريك عن مغيرة عن ابراهيم والشعبي قالا\r\nالسكر خمر",
+          "terjemah": "Telah mengabarkan kepada kami Suwaid bin Nashr ia berkata; telah mengabarkan kepada kami Abdullah dari Syarik dari Mughirah dari Ibrahim dan Asy Sya'bi keduanya berkata; Minuman yang memabukkan adalah khamer.",
+          "score": 0.9669148961702982,
+          "tags": "keduanya",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "minum"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 2
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_5197",
+          "arab": "حدثنا مسدد حدثنا اسماعيل اخبرنا ايوب عن عكرمة عن ابي هريرة رضي الله عنه\r\nنهى النبي صلى الله عليه وسلم ان يشرب من في السقاء",
+          "terjemah": "Telah menceritakan kepada kami Musaddad telah menceritakan kepada kami Isma'il telah mengabarkan kepada kami Ayyub dari Ikrimah dari Abu Hurairah radliallahu 'anhu bahwa Rasulullah shallallahu 'alaihi wasallam melarang seseorang minum langsung dari mulut geribah.",
+          "score": 0.9672426621119181,
+          "tags": "bahwa, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "minum"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_5662",
+          "arab": "اخبرنا اسحق بن ابراهيم قال انبانا جرير قال\r\nكان ابن شبرمة لا يشرب الا الماء واللبن",
+          "terjemah": "Telah mengabarkan kepada kami Ishaq bin Ibrahim ia berkata; telah memberitakan kepada kami Jarir ia berkata,  Ibnu Syubrumah tidak minum kecuali air atau susu.",
+          "score": 0.9680632988611857,
+          "tags": "kecuali",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "minum"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 4
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:46.418039"
+    },
+    {
+      "query_id": 5,
+      "original_query": "berikan hadis tentang mati syahid",
+      "optimized_query": "passage: berikan hadis tentang mati syahid. Kata kunci penting: hadis mati syahid",
+      "required_keywords": [
+        "hadis",
+        "mati",
+        "syahid"
+      ],
+      "keywords_count": 3,
+      "results_count": 5,
+      "processing_time_seconds": 0.4434366226196289,
+      "quality_metrics": {
+        "overall_quality": 4.700982265768615,
+        "metrics": {
+          "avg_keyword_coverage": 0.3333333333333333,
+          "avg_literal_overlap": 0.3333333333333333,
+          "avg_semantic_score": 0.5070595729741124,
+          "source_diversity": 0.8
+        },
+        "quality_components": {
+          "keyword_coverage": 0.3333333333333333,
+          "literal_overlap": 0.3333333333333333,
+          "semantic_score": 0.5070595729741124,
+          "source_diversity": 0.8
+        }
+      },
+      "results": [
+        {
+          "kitab": "sunan_tirmidzi",
+          "id": "sunan_tirmidzi_1267",
+          "arab": "حدثنا بذلك الحسن بن علي الخلال حدثنا عبد الرزاق اخبرنا معمر عن الزهري عن سالم عن ابيه\r\nعن النبي صلى الله عليه وسلم قال من اعتق نصيبا له في عبد فكان له من المال ما يبلغ ثمنه فهو عتيق من ماله\r\nقال ابو عيسى هذا حديث حسن صحيح",
+          "terjemah": "Telah menceritakan hadis itu kepada kami Al Hasan bin Ali Al Khallal, telah menceritakan kepada kami Abdurrazaq, telah mengabarkan kepada kami Ma'mar dari Az Zuhri dari Salim dari ayahnya dari Nabi shallallahu 'alaihi wasallam, beliau bersabda: Barangsiapa yang memerdekakan bagian dirinya pada seorang budak, maka jika hartanya mencapai harga (tebusan) nya, ia (budak) merdeka karena hartanya. Abu Isa berkata; Hadis ini hasan shahih.",
+          "score": 0.9713261167208354,
+          "tags": "dari nabi, hadis, hadis ini, isa, karena, maka, nabi, seorang",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 1
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_5104",
+          "arab": "حدثنا عبد الله بن يوسف اخبرنا مالك عن ابن شهاب عن ابي ادريس الخولاني عن ابي ثعلبة رضي الله عنه\r\nان رسول الله صلى الله عليه وسلم نهى عن اكل كل ذي ناب من السباع\r\nتابعه يونس ومعمر وابن عيينة والماجشون عن الزهري",
+          "terjemah": "Telah menceritakan kepada kami Abdullah bin Yusuf telah mengabarkan kepada kami Malik dari Ibnu Syihab dari Abu Idris Al Khaulani dari Abu Tsa'labah radliallahu 'anhu bahwa Rasulullah shallallahu 'alaihi wasallam melarang makan daging binatang buas yang bertaring. Hadis ini juga dikuatkan oleh riwayat Yunus, Ma'mar, Ibnu 'Uyainah dan Al Majisyun dari Az Zuhri.",
+          "score": 0.9719360510508219,
+          "tags": "bahwa, hadis, hadis ini, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 2
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_3784",
+          "arab": "اخبرنا قتيبة انبانا حماد عن محمد عن ابيه عن عمران قال\r\nقال النبي صلى الله عليه وسلم لا نذر في غضب وكفارته كفارة اليمين\r\nوقيل ان الزبير لم يسمع هذا الحديث من عمران بن حصين",
+          "terjemah": "Telah mengabarkan kepada kami Qutaibah telah memberitakan kepada kami Hammad dari Muhammad dari ayahnya dari Imran berkata, Nabi shallallahu 'alaihi wasallam bersabda: Tidak boleh ada nadzar dalam kemarahan, dan kafarahnya adalah kafarah sumpah. Dan dikatakan, Sesungguhnya Az Zubair tidak mendengar hadis ini dari Imran bin Hushain.",
+          "score": 0.9723736683527628,
+          "tags": "hadis, hadis ini, nabi, sesungguhnya",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_tirmidzi",
+          "id": "sunan_tirmidzi_2423",
+          "arab": "حدثنا احمد بن منيع حدثنا زيد بن حباب حدثنا علي بن مسعدة الباهلي حدثنا قتادة عن انس\r\nان النبي صلى الله عليه وسلم قال كل ابن ادم خطاء وخير الخطايين التوابون\r\nقال ابو عيسى هذا حديث غريب لا نعرفه الا من حديث علي بن مسعدة عن قتادة",
+          "terjemah": "Telah menceritakan kepada kami Ahmad bin Mani' telah menceritakan kepada kami Zaid bin Hubab telah menceritakan kepada kami Ali bin Mas'adah Al Bahili telah menceritakan kepada kami Qatadah dari Anas nabi Shallallahu 'alaihi wa Salam bersabda: Semua anak cucu Adam banyak salah dan sebaik-baik orang yang bersalah adalah mereka yang bertaubat. Berkata Abu Isa: Hadis ini gharib, kami hanya mengetahuinya dari hadis Ali bin Mas'adah dari Qatadah.",
+          "score": 0.9723847548166911,
+          "tags": "anak, hadis, hadis ini, isa, nabi, orang, orang yang",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 4
+        },
+        {
+          "kitab": "sunan_abu_daud",
+          "id": "sunan_abu_daud_549",
+          "arab": "حدثنا محمد بن عيسى بن الطباع حدثنا حجاج عن ابن جريج قال\r\nاكثر ما رايت عطاء يصلي سادلا\r\nقال ابو داود وهذا يضعف ذلك الحديث",
+          "terjemah": "Telah menceritakan kepada kami Muhammad bin Isa bin Ath-Thabba' telah menceritakan kepada kami Hajjaj dari Ibnu Juraij dia berkata; Sering saya melihat 'Atha` shalat dengan menjulurkan pakaian. Abu Dawud berkata: Hadis ini melemahkan hadis sebelumnya.",
+          "score": 0.9727543036142985,
+          "tags": "hadis, hadis ini, isa, shalat, shalat dengan",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:46.861476"
+    },
+    {
+      "query_id": 6,
+      "original_query": "berikan hadis tentang shalat jum'at",
+      "optimized_query": "passage: berikan hadis tentang shalat jum'at. Kata kunci penting: hadis jumat shalat",
+      "required_keywords": [
+        "hadis",
+        "jumat",
+        "shalat"
+      ],
+      "keywords_count": 3,
+      "results_count": 5,
+      "processing_time_seconds": 0.7090287208557129,
+      "quality_metrics": {
+        "overall_quality": 3.894011345307575,
+        "metrics": {
+          "avg_keyword_coverage": 0.3333333333333333,
+          "avg_literal_overlap": 0.3333333333333333,
+          "avg_semantic_score": 0.5042712047896967,
+          "source_diversity": 0.4
+        },
+        "quality_components": {
+          "keyword_coverage": 0.3333333333333333,
+          "literal_overlap": 0.3333333333333333,
+          "semantic_score": 0.5042712047896967,
+          "source_diversity": 0.4
+        }
+      },
+      "results": [
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_1233",
+          "arab": "حدثنا مسدد عن ابي عوانة عن قتادة عن عطاء عن جابر بن عبد الله رضي الله عنهما\r\nان رسول الله صلى الله عليه وسلم صلى على النجاشي فكنت في الصف الثاني او الثالث",
+          "terjemah": "Telah menceritakan kepada kami Musaddad dari Abu 'Awanah dari Qatadah dari 'Atha' dari Jabir bin 'Abdullah radliallahu 'anhua bahwa Rasulullah Shallallahu'alaihiwasallam melaksanakan shalat jenazah sedang aku ikut shalat berdiri pada shaf kedua atau ketiga.",
+          "score": 0.9820526281992594,
+          "tags": "aku, bahwa, ikut shalat, melaksanakan shalat, rasulullah, shalat, shalat jenazah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 1
+        },
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_1284",
+          "arab": "حدثنا هشام بن عمار حدثنا عبد الرحمن بن سعد بن عمار بن سعد حدثني ابي عن ابيه عن جده\r\nان النبي صلى الله عليه وسلم كان يخرج الى العيد ماشيا ويرجع ماشيا",
+          "terjemah": "Telah menceritakan kepada kami Hisyam bin 'Ammar berkata, telah menceritakan kepada kami 'Abdurrahman bin Sa'd bin 'Ammar bin Sa'd berkata, telah menceritakan kepadaku Bapakku dari Bapaknya dari Kakeknya berkata, Nabi shallallahu 'alaihi wasallam berangkat menuju shalat ied dengan berjalan, demikian juga ketika kembali.",
+          "score": 0.9825415054957072,
+          "tags": "kepadaku, menuju shalat, nabi, shalat, shalat ied",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 2
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_756",
+          "arab": "حدثنا عبد الله بن ابي الاسود قال حدثنا اسماعيل عن خالد الحذاء عن ابي قلابة عن انس بن مالك رضي الله عنه قال\r\nكان القنوت في المغرب والفجر",
+          "terjemah": "Telah menceritakan kepada kami 'Abdullah bin Abu Al Aswad berkata, telah menceritakan kepada kami Isma'il dari Khalid Al Hadzdza' dari Abu Qilabah dari Anas bin Malik radliallahu 'anhu berkata, Doa qunut itu ada dalam shalat Maghrib dan Shubuh.",
+          "score": 0.9826793114344279,
+          "tags": "dalam shalat, dalam shalat maghrib, doa, doa qunut, shalat, shalat maghrib, shalat maghrib dan",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_1136",
+          "arab": "حدثنا ابو بكر بن ابي شيبة حدثنا ابو الاحوص عن ابي اسحق عن الاسود عن عايشة قالت\r\nكان النبي صلى الله عليه وسلم اذا توضا صلى ركعتين ثم خرج الى الصلاة",
+          "terjemah": "Telah menceritakan kepada kami Abu Bakr bin Abu Syaibah berkata, telah menceritakan kepada kami Abul Ahwash dari Abu Ishaq dari Al Aswad dari Aisyah ia berkata, Jika berwudlu Nabi shallallahu 'alaihi wasallam shalat dua raka'at, kemudian berangkat shalat.",
+          "score": 0.9834561983744303,
+          "tags": "dua, nabi, shalat, shalat dua, wasallam shalat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 4
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_665",
+          "arab": "حدثنا ابو معمر قال حدثنا عبد الوارث قال حدثنا عبد العزيز عن انس بن مالك قال\r\nكان النبي صلى الله عليه وسلم يوجز الصلاة ويكملها",
+          "terjemah": "Telah menceritakan kepada kami Abu Ma'mar berkata, telah menceritakan kepada kami Abdul Warits berkata, telah menceritakan kepada kami 'Abdul 'Aziz dari Anas bin Malik berkata, Nabi shallallahu 'alaihi wasallam shalat dengan pendek dan sempurna.",
+          "score": 0.9845717589060465,
+          "tags": "nabi, shalat, shalat dengan, wasallam shalat",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:47.570505"
+    },
+    {
+      "query_id": 7,
+      "original_query": "berikan hadis tentang perang",
+      "optimized_query": "passage: berikan hadis tentang perang. Kata kunci penting: hadis perang",
+      "required_keywords": [
+        "hadis",
+        "perang"
+      ],
+      "keywords_count": 2,
+      "results_count": 5,
+      "processing_time_seconds": 0.6798431873321533,
+      "quality_metrics": {
+        "overall_quality": 5.602193472702785,
+        "metrics": {
+          "avg_keyword_coverage": 0.5,
+          "avg_literal_overlap": 0.5,
+          "avg_semantic_score": 0.5008773890811142,
+          "source_diversity": 0.8
+        },
+        "quality_components": {
+          "keyword_coverage": 0.5,
+          "literal_overlap": 0.5,
+          "semantic_score": 0.5008773890811142,
+          "source_diversity": 0.8
+        }
+      },
+      "results": [
+        {
+          "kitab": "sunan_tirmidzi",
+          "id": "sunan_tirmidzi_1724",
+          "arab": "حدثنا قتيبة حدثنا ابن لهيعة عن ابي الزبير عن جابر\r\nان النبي صلى الله عليه وسلم قال اذا اكل احدكم طعاما فسقطت لقمة فليمط ما رابه منها ثم ليطعمها ولا يدعها للشيطان\r\nقال وفي الباب عن انس",
+          "terjemah": "Telah menceritakan kepada kami Qutaibah, telah menceritakan kepada kami Ibnu Lahi'ah dari Abu Zubair dari Jabir bahwa Nabi shallallahu 'alaihi wasallam bersabda: Jika seseorang memakan makanan lalu sebagiannya jatuh, hendaknya dia menghilangkan debu yang mencampurinya kemudian memakannya, dan janganlah dia membiarkannya untuk setan. Hadis semakna juga diriwayatkan dari Anas.",
+          "score": 0.9959828019142151,
+          "tags": "bahwa, hadis, nabi",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 1
+        },
+        {
+          "kitab": "sunan_abu_daud",
+          "id": "sunan_abu_daud_549",
+          "arab": "حدثنا محمد بن عيسى بن الطباع حدثنا حجاج عن ابن جريج قال\r\nاكثر ما رايت عطاء يصلي سادلا\r\nقال ابو داود وهذا يضعف ذلك الحديث",
+          "terjemah": "Telah menceritakan kepada kami Muhammad bin Isa bin Ath-Thabba' telah menceritakan kepada kami Hajjaj dari Ibnu Juraij dia berkata; Sering saya melihat 'Atha` shalat dengan menjulurkan pakaian. Abu Dawud berkata: Hadis ini melemahkan hadis sebelumnya.",
+          "score": 0.9960983157157898,
+          "tags": "hadis, hadis ini, isa, shalat, shalat dengan",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 2
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_5088",
+          "arab": "حدثنا قتيبة حدثنا جرير عن هشام عن فاطمة بنت المنذر ان اسماء بنت ابي بكر قالت\r\nنحرنا على عهد رسول الله صلى الله عليه وسلم فرسا فاكلناه\r\nتابعه وكيع وابن عيينة عن هشام في النحر",
+          "terjemah": "Telah menceritakan kepada kami Qutaibah berkata, telah menceritakan kepada kami Jarir dari Hisyam dari Fatimah bin Al Mundzir bahwa Asma binti Abu Bakar radliallahu 'anhuma berkata, Pada masa Rasulullah shallallahu 'alaihi wasallam kami pernah berkurban dengan menyembelih kuda, lalu kami memakannya. Hadis ini dikuatkan oleh Waki' dan Ibnu Uyainah dari Hisyam tentang penyembelihan kurban.",
+          "score": 0.9964756727218628,
+          "tags": "bahwa, hadis, hadis ini, pernah, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_38",
+          "arab": "حدثنا ابو بكر بن ابي شيبة حدثنا علي بن هاشم عن ابن ابي ليلى عن الحكم عن عبد الرحمن بن ابي ليلى عن علي رضي الله عنه\r\nعن النبي صلى الله عليه وسلم قال من حدث عني حديثا وهو يرى انه كذب فهو احد الكاذبين",
+          "terjemah": "Telah menceritakan kepada kami Abu Bakr bin Abu Syaibah berkata, telah menceritakan kepada kami Ali bin Hisyam dari Ibnu Abu Laila dari Al Hakam dari Abdurrahman bin Abu Laila dari Ali radliallahu 'anhu dari Nabi shallallahu 'alaihi wasallam, beliau bersabda:  Barangsiapa menyampaikan satu hadis dariku, sementara dia melihat bahwa hadis itu dusta, maka dia adalah salah satu pendusta.",
+          "score": 0.9969615697860718,
+          "tags": "bahwa, dari nabi, hadis, maka, nabi, satu",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 4
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_2626",
+          "arab": "حدثنا احمد بن يونس حدثنا زهير حدثنا حميد ان انسا حدثهم قال\r\nرجعنا من غزوة تبوك مع النبي صلى الله عليه وسلم",
+          "terjemah": "Telah bercerita kepada kami Ahmad bin Yunus telah bercerita kepada kami Zuhair telah bercerita kepada kami Humaid bahwa Anas bercerita kepada mereka, katanya: Kami kembali dari perang Tabuk bersama Nabi shallallahu 'alaihi wasallam .",
+          "score": 0.9969650268554687,
+          "tags": "bahwa, bersama, nabi",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "perang"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:48.250348"
+    },
+    {
+      "query_id": 8,
+      "original_query": "berikan hadis tentang sedekah",
+      "optimized_query": "passage: berikan hadis tentang sedekah. Kata kunci penting: hadis sedekah",
+      "required_keywords": [
+        "hadis",
+        "sedekah"
+      ],
+      "keywords_count": 2,
+      "results_count": 5,
+      "processing_time_seconds": 0.5012598037719727,
+      "quality_metrics": {
+        "overall_quality": 5.1931123224537865,
+        "metrics": {
+          "avg_keyword_coverage": 0.5,
+          "avg_literal_overlap": 0.5,
+          "avg_semantic_score": 0.4972449289815146,
+          "source_diversity": 0.6
+        },
+        "quality_components": {
+          "keyword_coverage": 0.5,
+          "literal_overlap": 0.5,
+          "semantic_score": 0.4972449289815146,
+          "source_diversity": 0.6
+        }
+      },
+      "results": [
+        {
+          "kitab": "sunan_tirmidzi",
+          "id": "sunan_tirmidzi_3485",
+          "arab": "حدثنا سفيان بن وكيع حدثنا ابي عن سفيان عن عاصم بن عبيد الله عن سالم عن ابن عمر عن عمر\r\nانه استاذن النبي صلى الله عليه وسلم في العمرة فقال اي اخي اشركنا في دعايك ولا تنسنا\r\nقال ابو عيسى هذا حديث حسن صحيح",
+          "terjemah": "Telah menceritakan kepada kami Sufyan bin Waki' telah menceritakan kepada kami Ayahku dari Sufyan dari 'Ashim bin 'Ubaidullah dari Salim dari Ibnu Umar dari Umar bahwa ia meminta izin kepada Nabi shallallahu 'alaihi wasallam untuk berumrah, kemudian beliau berkata: Wahai saudaraku, ikutkan kami dalam doamu, dan jangan lupakan kami! Abu Isa berkata; hadis ini adalah hadis hasan shahih.",
+          "score": 1.0104629755020142,
+          "tags": "bahwa, berumrah, hadis, hadis ini, isa, nabi, umar, wahai",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 1
+        },
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_313",
+          "arab": "حدثنا محمد بن رمح المصري انبانا الليث بن سعد عن يزيد بن ابي حبيب انه سمع عبد الله بن الحارث بن جزء الزبيدي يقول\r\nانا اول من سمع النبي صلى الله عليه وسلم يقول لا يبولن احدكم مستقبل القبلة وانا اول من حدث الناس بذلك",
+          "terjemah": "Telah menceritakan kepada kami Muhammad bin Rumh Al Mishri telah memberitakan kepada kami Al Laits bin Sa'd dari Yazid bin Abi Habib bahwasanya dia mendengar Abdullah bin Al Harits bin Jaz`i Az Zubaidi berkata; aku adalah orang yang pertama mendengar Nabi shallallahu 'alaihi wasallam bersabda: janganlah salah seorang dari kalian kencing dengan menghadap ke arah Kiblat. Dan akulah orang yang pertama kali menyampaikan hadis ini kepada orang-orang.",
+          "score": 1.0107784032821656,
+          "tags": "aku, hadis, hadis ini, kali, nabi, orang, orang yang, seorang",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 2
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_3784",
+          "arab": "اخبرنا قتيبة انبانا حماد عن محمد عن ابيه عن عمران قال\r\nقال النبي صلى الله عليه وسلم لا نذر في غضب وكفارته كفارة اليمين\r\nوقيل ان الزبير لم يسمع هذا الحديث من عمران بن حصين",
+          "terjemah": "Telah mengabarkan kepada kami Qutaibah telah memberitakan kepada kami Hammad dari Muhammad dari ayahnya dari Imran berkata, Nabi shallallahu 'alaihi wasallam bersabda: Tidak boleh ada nadzar dalam kemarahan, dan kafarahnya adalah kafarah sumpah. Dan dikatakan, Sesungguhnya Az Zubair tidak mendengar hadis ini dari Imran bin Hushain.",
+          "score": 1.0109818935394288,
+          "tags": "hadis, hadis ini, nabi, sesungguhnya",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_41",
+          "arab": "حدثنا ابو بكر بن ابي شيبة حدثنا وكيع عن سفيان عن حبيب بن ابي ثابت عن ميمون بن ابي شبيب عن المغيرة بن شعبة قال\r\nقال رسول الله صلى الله عليه وسلم من حدث عني بحديث وهو يرى انه كذب فهو احد الكاذبين",
+          "terjemah": "Telah menceritakan kepada kami Abu Bakr bin Abu Syaibah berkata, telah menceritakan kepada kami Waki' dari Sufyan dari Habib bin Abu Tsabit dari Maimun bin Abu Syabib dari Mughirah bin Syu'bah ia berkata; Rasulullah shallallahu 'alaihi wasallam bersabda:  Barangsiapa menyampaikan satu hadis dariku, sementara dia melihat bahwa hadis itu dusta, maka dia adalah salah satu pendusta.",
+          "score": 1.0115090966224671,
+          "tags": "bahwa, hadis, maka, rasulullah, satu",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 4
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_3822",
+          "arab": "اخبرنا محمد بن ادريس قال حدثنا ابو توبة قال حدثنا معاوية بن سلام عن يحيى بن ابي كثير عن يزيد بن نعيم عن جابر بن عبد الله\r\nان النبي صلى الله عليه وسلم نهى عن الحقل وهي المزابنة خالفه هشام ورواه عن يحيى عن ابي سلمة عن جابر",
+          "terjemah": "Telah mengabarkan kepada kami Muhammad bin Idris telah menceritakan kepada kami Abu Taubah telah menceritakan kepada kami Mu'awiyah bin Sallam dari Yahya bin Abi Katsir dari Yazid bin Nu'aim dari Jabir bin Abdullah bahwa Nabi shallallahu 'alaihi wasallam melarang dari haql yaitu muzabanah. Hadis tersebut diselisihi oleh Hisyam, dan diriwayatkan dari Yahya dari Abu Salamah dari Jabir.",
+          "score": 1.0116748571395875,
+          "tags": "bahwa, hadis, nabi, tersebut",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:48.751608"
+    },
+    {
+      "query_id": 9,
+      "original_query": "berikan hadits tentang shalat dhuhur",
+      "optimized_query": "passage: berikan hadits tentang shalat dhuhur. Kata kunci penting: dhuhur shalat",
+      "required_keywords": [
+        "dhuhur",
+        "shalat"
+      ],
+      "keywords_count": 2,
+      "results_count": 5,
+      "processing_time_seconds": 0.4311978816986084,
+      "quality_metrics": {
+        "overall_quality": 5.188387065995328,
+        "metrics": {
+          "avg_keyword_coverage": 0.5,
+          "avg_literal_overlap": 0.5,
+          "avg_semantic_score": 0.49535482639813094,
+          "source_diversity": 0.6
+        },
+        "quality_components": {
+          "keyword_coverage": 0.5,
+          "literal_overlap": 0.5,
+          "semantic_score": 0.49535482639813094,
+          "source_diversity": 0.6
+        }
+      },
+      "results": [
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_904",
+          "arab": "حدثنا ابراهيم بن المنذر قال حدثنا انس بن عياض عن عبيد الله عن نافع عن عبد الله بن عمر\r\nان رسول الله صلى الله عليه وسلم كان يصلي في الاضحى والفطر ثم يخطب بعد الصلاة",
+          "terjemah": "Telah menceritakan kepada kami Ibrahim bin Al Mundzir berkata, telah menceritakan kepada kami Anas bin 'Iyadl dari 'Ubaidullah dari Nafi' dari 'Abdullah bin 'Umar bahwa Rasulullah shallallahu 'alaihi wasallam melaksanakan shalat 'Idul Adlha dan 'Idul Fitri kemudian berkhutbah setelah shalat.",
+          "score": 1.018100953102112,
+          "tags": "bahwa, melaksanakan shalat, rasulullah, setelah shalat, shalat, umar",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 1
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_949",
+          "arab": "حدثنا مسدد قال حدثنا اسماعيل قال حدثنا خالد عن ابي قلابة عن انس بن مالك قال\r\nكان القنوت في المغرب والفجر",
+          "terjemah": "Telah menceritakan kepada kami Musaddad berkata, telah menceritakan kepada kami Isma'il berkata, telah menceritakan kepada kami Khalid dari Abu Qilabah dari Anas bin Malik berkata, Qunut itu dilakukan pada shalat Maghrib dan Shubuh.",
+          "score": 1.0184505939483643,
+          "tags": "pada shalat, shalat, shalat maghrib, shalat maghrib dan",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 2
+        },
+        {
+          "kitab": "shahih_muslim",
+          "id": "shahih_muslim_702",
+          "arab": "و حدثنا ابو بكر بن ابي شيبة حدثنا يزيد بن هارون عن التيمي عن ابي المنهال عن ابي برزة\r\nان رسول الله صلى الله عليه وسلم كان يقرا في صلاة الغداة من الستين الى الماية",
+          "terjemah": "Dan telah menceritakan kepada kami Abu Bakar bin Abi Syaibah telah menceritakan kepada kami Yazid bin Harun dari at-Taimi dari Abu al-Minhal dari Abu Barzah bahwa Rasulullah Shallallahu'alaihiwasallam dahulu membaca dalam shalat shubuh enam puluh hingga seratus ayat.",
+          "score": 1.0188611507415772,
+          "tags": "bahwa, dalam shalat, dalam shalat shubuh, rasulullah, shalat, shalat shubuh",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_565",
+          "arab": "اخبرنا احمد بن حرب قال حدثنا سفيان عن هشام بن حجير عن طاوس عن ابن عباس\r\nان النبي صلى الله عليه وسلم نهى عن الصلاة بعد العصر",
+          "terjemah": "Telah mengabarkan kepada kami Ahmad bin Harb dia berkata; Telah menceritakan kepada kami Sufyan dari Hisyam bin Hujair dari Thawus dari Ibnu Abbas bahwa Nabi Shallallahu'alaihi wasallam melarang shalat setelah Ashar.",
+          "score": 1.0188665747642518,
+          "tags": "bahwa, melarang shalat, melarang shalat setelah, nabi, shalat, shalat setelah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 4
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_1233",
+          "arab": "حدثنا مسدد عن ابي عوانة عن قتادة عن عطاء عن جابر بن عبد الله رضي الله عنهما\r\nان رسول الله صلى الله عليه وسلم صلى على النجاشي فكنت في الصف الثاني او الثالث",
+          "terjemah": "Telah menceritakan kepada kami Musaddad dari Abu 'Awanah dari Qatadah dari 'Atha' dari Jabir bin 'Abdullah radliallahu 'anhua bahwa Rasulullah Shallallahu'alaihiwasallam melaksanakan shalat jenazah sedang aku ikut shalat berdiri pada shaf kedua atau ketiga.",
+          "score": 1.0194959402084351,
+          "tags": "aku, bahwa, ikut shalat, melaksanakan shalat, rasulullah, shalat, shalat jenazah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "shalat"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:49.182805"
+    },
+    {
+      "query_id": 10,
+      "original_query": "bagaimana cara berwudhu yang benar?",
+      "optimized_query": "passage: bagaimana cara berwudhu yang benar?. Kata kunci penting: benar wudhu",
+      "required_keywords": [
+        "benar",
+        "wudhu"
+      ],
+      "keywords_count": 2,
+      "results_count": 1,
+      "processing_time_seconds": 0.5045580863952637,
+      "quality_metrics": {
+        "overall_quality": 5.989527446710419,
+        "metrics": {
+          "avg_keyword_coverage": 0.5,
+          "avg_literal_overlap": 0.5,
+          "avg_semantic_score": 0.4958109786841674,
+          "source_diversity": 1.0
+        },
+        "quality_components": {
+          "keyword_coverage": 0.5,
+          "literal_overlap": 0.5,
+          "semantic_score": 0.4958109786841674,
+          "source_diversity": 1.0
+        }
+      },
+      "results": [
+        {
+          "kitab": "sunan_abu_daud",
+          "id": "sunan_abu_daud_52",
+          "arab": "حدثنا محمد بن كثير حدثنا همام عن علي بن زيد عن ام محمد عن عايشة\r\nان النبي صلى الله عليه وسلم كان لا يرقد من ليل ولا نهار فيستيقظ الا تسوك قبل ان يتوضا",
+          "terjemah": "Telah menceritakan kepada kami Muhammad bin Katsir telah menceritakan kepada kami Hammam dari Ali bin Zaid dari Ummu Muhammad dari Aisyah bahwasanya Nabi shallallahu 'alaihi wasallam tidaklah bangun dari tidurnya baik malam maupun siang, kecuali beliau bersiwak dahulu sebelum beliau berwudhu.",
+          "score": 1.0168976545333863,
+          "tags": "beliau berwudhu, berwudhu, kecuali, nabi",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "wudhu"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.5,
+            "total_keywords": 2,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 1
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:49.687364"
+    },
+    {
+      "query_id": 11,
+      "original_query": "apa hukum jual beli dalam islam?",
+      "optimized_query": "passage: apa hukum jual beli dalam islam?. Kata kunci penting: beli dalam hukum islam islami jual keislaman muslim",
+      "required_keywords": [
+        "beli",
+        "dalam",
+        "hukum",
+        "islam",
+        "islami",
+        "jual",
+        "keislaman",
+        "muslim"
+      ],
+      "keywords_count": 8,
+      "results_count": 0,
+      "processing_time_seconds": 0.4592258930206299,
+      "quality_metrics": {
+        "overall_quality": 0,
+        "metrics": {}
+      },
+      "results": [],
+      "timestamp": "2025-08-27T05:43:50.146589"
+    },
+    {
+      "query_id": 12,
+      "original_query": "berikan hadis tentang puasa ramadan",
+      "optimized_query": "passage: berikan hadis tentang puasa ramadan. Kata kunci penting: hadis puasa ramadan",
+      "required_keywords": [
+        "hadis",
+        "puasa",
+        "ramadan"
+      ],
+      "keywords_count": 3,
+      "results_count": 5,
+      "processing_time_seconds": 0.3463420867919922,
+      "quality_metrics": {
+        "overall_quality": 4.706411365306501,
+        "metrics": {
+          "avg_keyword_coverage": 0.3333333333333333,
+          "avg_literal_overlap": 0.3333333333333333,
+          "avg_semantic_score": 0.5092312127892671,
+          "source_diversity": 0.8
+        },
+        "quality_components": {
+          "keyword_coverage": 0.3333333333333333,
+          "literal_overlap": 0.3333333333333333,
+          "semantic_score": 0.5092312127892671,
+          "source_diversity": 0.8
+        }
+      },
+      "results": [
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_41",
+          "arab": "حدثنا ابو بكر بن ابي شيبة حدثنا وكيع عن سفيان عن حبيب بن ابي ثابت عن ميمون بن ابي شبيب عن المغيرة بن شعبة قال\r\nقال رسول الله صلى الله عليه وسلم من حدث عني بحديث وهو يرى انه كذب فهو احد الكاذبين",
+          "terjemah": "Telah menceritakan kepada kami Abu Bakr bin Abu Syaibah berkata, telah menceritakan kepada kami Waki' dari Sufyan dari Habib bin Abu Tsabit dari Maimun bin Abu Syabib dari Mughirah bin Syu'bah ia berkata; Rasulullah shallallahu 'alaihi wasallam bersabda:  Barangsiapa menyampaikan satu hadis dariku, sementara dia melihat bahwa hadis itu dusta, maka dia adalah salah satu pendusta.",
+          "score": 0.961884085337321,
+          "tags": "bahwa, hadis, maka, rasulullah, satu",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 1
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_3063",
+          "arab": "حدثنا عبيد بن اسماعيل حدثنا ابو اسامة عن هشام عن ابيه عن عايشة رضي الله عنها قالت\r\nقال النبي صلى الله عليه وسلم اقتلوا ذا الطفيتين فانه يلتمس البصر ويصيب الحبل\r\nتابعه حماد بن سلمة ابا اسامة",
+          "terjemah": "Telah bercerita kepada kami 'Ubaid bin Isma'il telah bercerita kepada kami Abu Usamah dari Hisyam dari bapaknya dari 'Aisyah radliallahu 'anhu berkata; Rasulullah shallallahu 'alaihi wasallam bersabda: Bunuhlah ular-ular belang karena jenis ular ini dapat merabunkan penglihatan dan mengugurkan kandungan. Hadis ini diikuti pula oleh Hammad bin Salamah dari Abu Usamah.",
+          "score": 0.9630380908648173,
+          "tags": "hadis, hadis ini, karena, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 2
+        },
+        {
+          "kitab": "sunan_tirmidzi",
+          "id": "sunan_tirmidzi_2393",
+          "arab": "حدثنا هناد حدثنا عبدة عن هشام بن عروة عن ابيه عن عايشة قالت\r\nكانت وسادة رسول الله صلى الله عليه وسلم التي يضطجع عليها من ادم حشوها ليف\r\nقال ابو عيسى هذا حديث صحيح",
+          "terjemah": "Telah menceritakan kepada kami Hannad telah menceritakan kepada kami 'Abdah dari Hisyam bin 'Urwah dari ayahnya dari 'Aisyah berkata: Bantal Rasulullah Shallallahu 'alahi wa Salam yang dipakai tidur terbuat dari kulit isinya rumput kering. Berkata Abu Isa: Hadis ini shahih.",
+          "score": 0.9637970368067423,
+          "tags": "hadis, hadis ini, isa, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_abu_daud",
+          "id": "sunan_abu_daud_3381",
+          "arab": "حدثنا احمد بن حنبل حدثنا عبد الرزاق حدثنا معمر عن همام بن منبه قال هذا ما حدثنا ابو هريرة\r\nعن رسول الله صلى الله عليه وسلم قال العين حق",
+          "terjemah": "Telah menceritakan kepada kami Ahmad bin Hanbal telah menceritakan kepada kami Abdurrazzaq telah menceritakan kepada kami Ma'mar dari Hammam bin Munabbih ia berkata; Ini adalah hadis yang telah diceritakan Abu Hurairah kepada kami dari Rasulullah, Beliau bersabda: Penyakit Ain (pengaruh mata orang yang dengki) itu benar adanya.",
+          "score": 0.9649457375208537,
+          "tags": "hadis, orang, orang yang, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 4
+        },
+        {
+          "kitab": "sunan_abu_daud",
+          "id": "sunan_abu_daud_549",
+          "arab": "حدثنا محمد بن عيسى بن الطباع حدثنا حجاج عن ابن جريج قال\r\nاكثر ما رايت عطاء يصلي سادلا\r\nقال ابو داود وهذا يضعف ذلك الحديث",
+          "terjemah": "Telah menceritakan kepada kami Muhammad bin Isa bin Ath-Thabba' telah menceritakan kepada kami Hajjaj dari Ibnu Juraij dia berkata; Sering saya melihat 'Atha` shalat dengan menjulurkan pakaian. Abu Dawud berkata: Hadis ini melemahkan hadis sebelumnya.",
+          "score": 0.9650612513224284,
+          "tags": "hadis, hadis ini, isa, shalat, shalat dengan",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.3333333333333333,
+          "boost_applied": 0.06666666666666667,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:50.492932"
+    },
+    {
+      "query_id": 13,
+      "original_query": "bagaimana hukum nikah dalam islam?",
+      "optimized_query": "passage: bagaimana hukum nikah dalam islam?. Kata kunci penting: dalam hukum islam islami keislaman muslim nikah",
+      "required_keywords": [
+        "dalam",
+        "hukum",
+        "islam",
+        "islami",
+        "keislaman",
+        "muslim",
+        "nikah"
+      ],
+      "keywords_count": 7,
+      "results_count": 3,
+      "processing_time_seconds": 0.33850812911987305,
+      "quality_metrics": {
+        "overall_quality": 5.976796761133062,
+        "metrics": {
+          "avg_keyword_coverage": 0.42857142857142855,
+          "avg_literal_overlap": 0.5833333333333334,
+          "avg_semantic_score": 0.49309965683417706,
+          "source_diversity": 1.0
+        },
+        "quality_components": {
+          "keyword_coverage": 0.42857142857142855,
+          "literal_overlap": 0.5833333333333334,
+          "semantic_score": 0.49309965683417706,
+          "source_diversity": 1.0
+        }
+      },
+      "results": [
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_6343",
+          "arab": "حدثنا عمرو بن علي حدثنا فضيل بن سليمان حدثنا مسلم بن ابي مريم حدثني عبد الرحمن بن جابر عمن سمع النبي صلى الله عليه وسلم قال\r\nلا عقوبة فوق عشر ضربات الا في حد من حدود الله",
+          "terjemah": "Telah menceritakan kepada kami 'Amru bin Ali telah menceritakan kepada kami Fudhail bin Sulaiman telah menceritakan kepada kami Muslim bin Abu Maryam telah mengabarkan kepadaku Abdurrahman bin Jabir, dari seseorang yang mendengar Nabi shallallahu 'alaihi wasallam bersabda: tidak boleh ada hukuman melebihi sepuluh kali pukulan selain dalam salah satu hukuman had Allah.",
+          "score": 0.9614148616790772,
+          "tags": "allah, kali, kepadaku, nabi, satu, sulaiman",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "dalam",
+              "hukum",
+              "muslim"
+            ],
+            "match_count": 3,
+            "match_ratio": 0.42857142857142855,
+            "total_keywords": 7,
+            "min_required": 3
+          },
+          "literal_overlap": 0.25,
+          "boost_applied": 0.05,
+          "rank": 1
+        },
+        {
+          "kitab": "shahih_muslim",
+          "id": "shahih_muslim_2539",
+          "arab": "و حدثني محمد بن رافع حدثنا عبد الرزاق اخبرنا معمر عن ايوب عن نافع عن ابن عمر\r\nان النبي صلى الله عليه وسلم قال لا شغار في الاسلام",
+          "terjemah": "Dan telah menceritakan kepadaku Muhammad bin Rafi' telah menceritakan kepada kami Abdur Razzaq telah mengabarkan kepada kami Ma'mar dari Ayyub dari Nafi' dari Ibnu Umar bahwasannya Nabi shallallahu 'alaihi wasallam bersabda: Tidak ada nikah syighar dalam Islam.",
+          "score": 1.0627286672592162,
+          "tags": "dalam islam, islam, kepadaku, nabi, nikah, nikah syighar, umar",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "dalam",
+              "islam",
+              "nikah"
+            ],
+            "match_count": 3,
+            "match_ratio": 0.42857142857142855,
+            "total_keywords": 7,
+            "min_required": 3
+          },
+          "literal_overlap": 0.75,
+          "boost_applied": 0.15000000000000002,
+          "rank": 2
+        },
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_1875",
+          "arab": "حدثنا الحسين بن مهدي قال انبانا عبد الرزاق انبانا معمر عن ثابت عن انس بن مالك قال\r\nقال رسول الله صلى الله عليه وسلم لا شغار في الاسلام",
+          "terjemah": "Telah menceritakan kepada kami Al Husain bin Mahdi ia berkata; telah memberitakan kepada kami Abdurrazaq berkata, telah memberitakan kepada kami Ma'mar dari Tsabit dari Anas bin Malik ia berkata, Rasulullah shallallahu 'alaihi wasallam bersabda: Tidak ada nikah syighar dalam Islam.",
+          "score": 1.0632672548294066,
+          "tags": "dalam islam, islam, nikah, nikah syighar, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "dalam",
+              "islam",
+              "nikah"
+            ],
+            "match_count": 3,
+            "match_ratio": 0.42857142857142855,
+            "total_keywords": 7,
+            "min_required": 3
+          },
+          "literal_overlap": 0.75,
+          "boost_applied": 0.15000000000000002,
+          "rank": 3
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:50.832440"
+    },
+    {
+      "query_id": 14,
+      "original_query": "apa yang dimaksud dengan jihad?",
+      "optimized_query": "passage: apa yang dimaksud dengan jihad?. Kata kunci penting: dimaksud jihad niat",
+      "required_keywords": [
+        "dimaksud",
+        "jihad",
+        "niat"
+      ],
+      "keywords_count": 3,
+      "results_count": 5,
+      "processing_time_seconds": 0.5104448795318604,
+      "quality_metrics": {
+        "overall_quality": 4.499560375211938,
+        "metrics": {
+          "avg_keyword_coverage": 0.39999999999999997,
+          "avg_literal_overlap": 0.5,
+          "avg_semantic_score": 0.499824150084775,
+          "source_diversity": 0.4
+        },
+        "quality_components": {
+          "keyword_coverage": 0.39999999999999997,
+          "literal_overlap": 0.5,
+          "semantic_score": 0.499824150084775,
+          "source_diversity": 0.4
+        }
+      },
+      "results": [
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_2664",
+          "arab": "حدثنا قبيصة حدثنا سفيان عن معاوية بهذا وعن حبيب بن ابي عمرة عن عايشة بنت طلحة عن عايشة ام المومنين\r\nعن النبي صلى الله عليه وسلم ساله نساوه عن الجهاد فقال نعم الجهاد الحج",
+          "terjemah": "Telah bercerita kepada kami Qabishah telah bercerita kepada kami Sufyan dari Mu'awiyah dengan hadis seperti ini. Dan dari Habib bin Abi 'Amrah dari 'Aisyah binti Thalhah dari 'Aisyah, ummul mu'minin radliallahu 'anha dari Nabi shallallahu 'alaihi wasallam bahwa para istri Beliau bertanya kepada Beliau tentang jihad, maka Beliau bersabda: sebaik-baik jihad (bagi kaum wanita) adalah hajii.",
+          "score": 0.9997243642807007,
+          "tags": "bahwa, dari nabi, hadis, jihad, maka, nabi, para, wanita",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "jihad"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 1
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_2576",
+          "arab": "حدثنا مسدد حدثنا خالد حدثنا حبيب بن ابي عمرة عن عايشة بنت طلحة عن عايشة رضي الله عنها انها قالت\r\nيا رسول الله ترى الجهاد افضل العمل افلا نجاهد قال لكن افضل الجهاد حج مبرور",
+          "terjemah": "Telah bercerita kepada kami Musaddad telah bercerita kepada kami Khalid telah bercerita kepada kami Habib bin Abu 'Amrah dari 'Aisyah binti Thalhah dari 'Aisyah radliallahu 'anha bahwa dia berkata: Wahai Rasulullah, engkau telah menjelaskan bahwa jihad adalah amal yang paling utama. Apakah kami boleh berjihad? Beliau bersabda: Tidak. Tetapi jihad yang paling utama (buat kaum wanita) adalah haji mabrur.",
+          "score": 1.000420367717743,
+          "tags": "apakah, bahwa, berjihad, haji, jihad, rasulullah, wahai, wanita",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "jihad"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 2
+        },
+        {
+          "kitab": "shahih_bukhari",
+          "id": "shahih_bukhari_2575",
+          "arab": "حدثنا علي بن عبد الله حدثنا يحيى بن سعيد حدثنا سفيان قال حدثني منصور عن مجاهد عن طاوس عن ابن عباس رضي الله عنهما قال\r\nقال رسول الله صلى الله عليه وسلم لا هجرة بعد الفتح ولكن جهاد ونية واذا استنفرتم فانفروا",
+          "terjemah": "Telah bercerita kepada kami 'Ali bin 'Abdullah telah bercerita kepada kami Yahya bin Sa'id telah bercerita kepada kami Sufyan berkata telah bercerita kepadaku Manshur dari Mujahid dari Thowus dari Ibnu 'Abbas radliallahu 'anhuma berkata; Rasulullah shallallahu 'alaihi wasallam bersabda: Tidak ada lagi hijrah setelah kemenangan (Makkah) akan tetapi yang tetap ada adalah jihad dan niat. Maka jika kalian diperintahkan berangkat berjihad, berangkatlah.",
+          "score": 1.000611996650696,
+          "tags": "adalah jihad, berjihad, jihad, jihad dan, kepadaku, maka, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "jihad",
+              "niat"
+            ],
+            "match_count": 2,
+            "match_ratio": 0.6666666666666666,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_2579",
+          "arab": "اخبرني محمد بن عبد الله بن عبد الحكم عن شعيب عن الليث قال حدثنا خالد عن ابن ابي هلال عن يزيد بن عبد الله عن محمد بن ابراهيم عن ابي سلمة عن ابي هريرة\r\nعن رسول الله صلى الله عليه وسلم قال جهاد الكبير والصغير والضعيف والمراة الحج والعمرة",
+          "terjemah": "Telah mengabarkan kepada kami Muhammad bin Abdullah bin Abdul Hakam dari Syu'aib dari Al Laits, ia berkata; telah menceritakan kepada kami Khalid dari Ibnu Abi Hilal dari Yazid bin Abdullah, dari Muhammad bin Ibrahim dari Abu Salamah dari Abu Hurairah dari Rasulullah shallallahu 'alaihi wasallam, beliau bersabda: Jihad orang yang sudah tua, anak kecil, orang yang lemah dan seorang wanita adalah melakukan haji dan umrah.",
+          "score": 1.0006773233413697,
+          "tags": "anak, dan umrah, haji, haji dan, haji dan umrah, jihad, melakukan haji, melakukan haji dan, orang, orang yang, rasulullah, seorang, umrah, wanita",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "jihad"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 4
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_2581",
+          "arab": "اخبرنا اسحق بن ابراهيم قال انبانا جرير عن حبيب وهو ابن ابي عمرة عن عايشة بنت طلحة قالت اخبرتني ام المومنين عايشة قالت\r\nقلت يا رسول الله الا نخرج فنجاهد معك فاني لا ارى عملا في القران افضل من الجهاد قال لا ولكن احسن الجهاد واجمله حج البيت حج مبرور",
+          "terjemah": "Telah mengabarkan kepada kami Ishaq bin Ibrahim, ia berkata; telah memberitakan kepada kami Jarir dari Hubaib yaitu Ibnu Abu 'Amrah dari Aisyah binti Thalhah, ia berkata; telah mengabarkan kepadaku Ummul mukminin Aisyah, ia berkata; aku pernah mengatakan; Wahai Rasulullah, tidakkah kami boleh berangkat berjihad bersamamu, karena aku tidak melihat suatu amalan didalam Alquran yang lebih utama daripada jihad?. Maka beliau bersabda:  Tapi sebaik-baik jihad dan yang paling indah adalah haji di Ka'bah atau haji mabrur.",
+          "score": 1.0020856618881226,
+          "tags": "aku, berjihad, haji, jihad, jihad dan, karena, kepadaku, lebih, maka, pernah, rasulullah, wahai",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "jihad"
+            ],
+            "match_count": 1,
+            "match_ratio": 0.3333333333333333,
+            "total_keywords": 3,
+            "min_required": 1
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:51.342885"
+    },
+    {
+      "query_id": 15,
+      "original_query": "berikan hadis tentang berbakti kepada orang tua",
+      "optimized_query": "passage: berikan hadis tentang berbakti kepada orang tua. Kata kunci penting: bakti hadis orang tua",
+      "required_keywords": [
+        "bakti",
+        "hadis",
+        "orang",
+        "tua"
+      ],
+      "keywords_count": 4,
+      "results_count": 5,
+      "processing_time_seconds": 0.43975210189819336,
+      "quality_metrics": {
+        "overall_quality": 5.473598293596544,
+        "metrics": {
+          "avg_keyword_coverage": 0.5,
+          "avg_literal_overlap": 0.45,
+          "avg_semantic_score": 0.49943931743861736,
+          "source_diversity": 0.8
+        },
+        "quality_components": {
+          "keyword_coverage": 0.5,
+          "literal_overlap": 0.45,
+          "semantic_score": 0.49943931743861736,
+          "source_diversity": 0.8
+        }
+      },
+      "results": [
+        {
+          "kitab": "sunan_tirmidzi",
+          "id": "sunan_tirmidzi_1724",
+          "arab": "حدثنا قتيبة حدثنا ابن لهيعة عن ابي الزبير عن جابر\r\nان النبي صلى الله عليه وسلم قال اذا اكل احدكم طعاما فسقطت لقمة فليمط ما رابه منها ثم ليطعمها ولا يدعها للشيطان\r\nقال وفي الباب عن انس",
+          "terjemah": "Telah menceritakan kepada kami Qutaibah, telah menceritakan kepada kami Ibnu Lahi'ah dari Abu Zubair dari Jabir bahwa Nabi shallallahu 'alaihi wasallam bersabda: Jika seseorang memakan makanan lalu sebagiannya jatuh, hendaknya dia menghilangkan debu yang mencampurinya kemudian memakannya, dan janganlah dia membiarkannya untuk setan. Hadis semakna juga diriwayatkan dari Anas.",
+          "score": 0.9609123945236206,
+          "tags": "bahwa, hadis, nabi",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis",
+              "orang"
+            ],
+            "match_count": 2,
+            "match_ratio": 0.5,
+            "total_keywords": 4,
+            "min_required": 2
+          },
+          "literal_overlap": 0.25,
+          "boost_applied": 0.05,
+          "rank": 1
+        },
+        {
+          "kitab": "sunan_ibnu_majah",
+          "id": "sunan_ibnu_majah_313",
+          "arab": "حدثنا محمد بن رمح المصري انبانا الليث بن سعد عن يزيد بن ابي حبيب انه سمع عبد الله بن الحارث بن جزء الزبيدي يقول\r\nانا اول من سمع النبي صلى الله عليه وسلم يقول لا يبولن احدكم مستقبل القبلة وانا اول من حدث الناس بذلك",
+          "terjemah": "Telah menceritakan kepada kami Muhammad bin Rumh Al Mishri telah memberitakan kepada kami Al Laits bin Sa'd dari Yazid bin Abi Habib bahwasanya dia mendengar Abdullah bin Al Harits bin Jaz`i Az Zubaidi berkata; aku adalah orang yang pertama mendengar Nabi shallallahu 'alaihi wasallam bersabda: janganlah salah seorang dari kalian kencing dengan menghadap ke arah Kiblat. Dan akulah orang yang pertama kali menyampaikan hadis ini kepada orang-orang.",
+          "score": 1.0113889932632447,
+          "tags": "aku, hadis, hadis ini, kali, nabi, orang, orang yang, seorang",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis",
+              "orang"
+            ],
+            "match_count": 2,
+            "match_ratio": 0.5,
+            "total_keywords": 4,
+            "min_required": 2
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 2
+        },
+        {
+          "kitab": "sunan_tirmidzi",
+          "id": "sunan_tirmidzi_2423",
+          "arab": "حدثنا احمد بن منيع حدثنا زيد بن حباب حدثنا علي بن مسعدة الباهلي حدثنا قتادة عن انس\r\nان النبي صلى الله عليه وسلم قال كل ابن ادم خطاء وخير الخطايين التوابون\r\nقال ابو عيسى هذا حديث غريب لا نعرفه الا من حديث علي بن مسعدة عن قتادة",
+          "terjemah": "Telah menceritakan kepada kami Ahmad bin Mani' telah menceritakan kepada kami Zaid bin Hubab telah menceritakan kepada kami Ali bin Mas'adah Al Bahili telah menceritakan kepada kami Qatadah dari Anas nabi Shallallahu 'alaihi wa Salam bersabda: Semua anak cucu Adam banyak salah dan sebaik-baik orang yang bersalah adalah mereka yang bertaubat. Berkata Abu Isa: Hadis ini gharib, kami hanya mengetahuinya dari hadis Ali bin Mas'adah dari Qatadah.",
+          "score": 1.011424219608307,
+          "tags": "anak, hadis, hadis ini, isa, nabi, orang, orang yang",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis",
+              "orang"
+            ],
+            "match_count": 2,
+            "match_ratio": 0.5,
+            "total_keywords": 4,
+            "min_required": 2
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 3
+        },
+        {
+          "kitab": "sunan_abu_daud",
+          "id": "sunan_abu_daud_3381",
+          "arab": "حدثنا احمد بن حنبل حدثنا عبد الرزاق حدثنا معمر عن همام بن منبه قال هذا ما حدثنا ابو هريرة\r\nعن رسول الله صلى الله عليه وسلم قال العين حق",
+          "terjemah": "Telah menceritakan kepada kami Ahmad bin Hanbal telah menceritakan kepada kami Abdurrazzaq telah menceritakan kepada kami Ma'mar dari Hammam bin Munabbih ia berkata; Ini adalah hadis yang telah diceritakan Abu Hurairah kepada kami dari Rasulullah, Beliau bersabda: Penyakit Ain (pengaruh mata orang yang dengki) itu benar adanya.",
+          "score": 1.0136717319488526,
+          "tags": "hadis, orang, orang yang, rasulullah",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis",
+              "orang"
+            ],
+            "match_count": 2,
+            "match_ratio": 0.5,
+            "total_keywords": 4,
+            "min_required": 2
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 4
+        },
+        {
+          "kitab": "sunan_nasai",
+          "id": "sunan_nasai_2301",
+          "arab": "قال الحارث بن مسكين قراءة عليه وانا اسمع عن ابن القاسم قال حدثني مالك عن ابن شهاب عن عايشة وحفصة مثله\r\nلا يصوم الا من اجمع الصيام قبل الفجر",
+          "terjemah": "Berkata Al Harits bin Miskin secara baca dan aku mendengarnya dari Ibnul Qasim dia berkata; telah menceritakan kepadaku Malik dari Ibnu Syihab dari 'Aisyah dan Hafshah dengan hadis yang sama; Tidak -dianggap- berpuasa kecuali orang yang berniat puasa sebelum terbit fajar.",
+          "score": 1.0149282574653626,
+          "tags": "aku, berpuasa, hadis, kecuali, kepadaku, orang, orang yang, puasa",
+          "keyword_match_details": {
+            "matched_keywords": [
+              "hadis",
+              "orang"
+            ],
+            "match_count": 2,
+            "match_ratio": 0.5,
+            "total_keywords": 4,
+            "min_required": 2
+          },
+          "literal_overlap": 0.5,
+          "boost_applied": 0.1,
+          "rank": 5
+        }
+      ],
+      "timestamp": "2025-08-27T05:43:51.782637"
+    }
+  ]
+}

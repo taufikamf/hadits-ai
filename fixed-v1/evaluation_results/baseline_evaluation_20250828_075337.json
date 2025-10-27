@@ -1,0 +1,178 @@
+{
+  "metadata": {
+    "timestamp": "2025-08-28T07:53:37.561385",
+    "total_queries": 10,
+    "successful_queries": 10,
+    "system_type": "Baseline"
+  },
+  "summary": {
+    "avg_rouge_1": 0.08259415080421058,
+    "avg_rouge_2": 0.0,
+    "avg_rouge_l": 0.07225744857026656,
+    "avg_bleu_score": 0.0,
+    "avg_semantic_similarity": 0.4874612271785736,
+    "avg_response_time_ms": 4362.1164083480835
+  },
+  "detailed_results": [
+    {
+      "query": "cara berwudhu yang benar",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.06666666242283978,
+        "rouge-2": 0.0,
+        "rouge-l": 0.06666666242283978
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.5621837973594666,
+      "response_time_ms": 3854.947090148926,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2119,
+      "reference_answer_length": 511,
+      "error": ""
+    },
+    {
+      "query": "hukum zakat fitrah",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.08791208392706212,
+        "rouge-2": 0.0,
+        "rouge-l": 0.07692307293805117
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.3709067106246948,
+      "response_time_ms": 3940.311908721924,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2133,
+      "reference_answer_length": 420,
+      "error": ""
+    },
+    {
+      "query": "keutamaan shalat berjamaah",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.12941176086920425,
+        "rouge-2": 0.0,
+        "rouge-l": 0.09411764322214548
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.5527051687240601,
+      "response_time_ms": 5123.654842376709,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2161,
+      "reference_answer_length": 398,
+      "error": ""
+    },
+    {
+      "query": "hukum riba",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.11363635972172019,
+        "rouge-2": 0.0,
+        "rouge-l": 0.11363635972172019
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.4124758243560791,
+      "response_time_ms": 3830.8379650115967,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2116,
+      "reference_answer_length": 437,
+      "error": ""
+    },
+    {
+      "query": "adab makan menurut rasulullah",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.05780346405025256,
+        "rouge-2": 0.0,
+        "rouge-l": 0.04624277040863414
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.5924688577651978,
+      "response_time_ms": 3752.512216567993,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2152,
+      "reference_answer_length": 412,
+      "error": ""
+    },
+    {
+      "query": "hukum puasa ramadan",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.06818181411415312,
+        "rouge-2": 0.0,
+        "rouge-l": 0.06818181411415312
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.36735016107559204,
+      "response_time_ms": 4133.399963378906,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2141,
+      "reference_answer_length": 418,
+      "error": ""
+    },
+    {
+      "query": "kewajiban berbakti kepada orang tua",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.08092485175582229,
+        "rouge-2": 0.0,
+        "rouge-l": 0.06936415811420382
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.44606995582580566,
+      "response_time_ms": 3395.4880237579346,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2102,
+      "reference_answer_length": 426,
+      "error": ""
+    },
+    {
+      "query": "hukum sholat jumat",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.06818181397275336,
+        "rouge-2": 0.0,
+        "rouge-l": 0.05681817760911705
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.37366199493408203,
+      "response_time_ms": 4720.317840576172,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2132,
+      "reference_answer_length": 466,
+      "error": ""
+    },
+    {
+      "query": "hukum jual beli dalam islam",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.0628272209862671,
+        "rouge-2": 0.0,
+        "rouge-l": 0.0628272209862671
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.5427185893058777,
+      "response_time_ms": 6003.528594970703,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2190,
+      "reference_answer_length": 450,
+      "error": ""
+    },
+    {
+      "query": "keutamaan membaca quran",
+      "success": true,
+      "rouge_scores": {
+        "rouge-1": 0.09039547622203088,
+        "rouge-2": 0.0,
+        "rouge-l": 0.06779660616553376
+      },
+      "bleu_score": 0.0,
+      "semantic_similarity": 0.6540712118148804,
+      "response_time_ms": 4866.165637969971,
+      "num_retrieved_hadits": 5,
+      "generated_answer_length": 2188,
+      "reference_answer_length": 442,
+      "error": ""
+    }
+  ]
+}
